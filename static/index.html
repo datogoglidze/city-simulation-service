@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.connecting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .grid-container {
+            position: relative;
+            width: 100%;
+            padding-top: 100%;
+            background: #f0f0f0;
+            border: 3px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .person {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            border: 2px solid #c92a2a;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .person:hover {
+            transform: scale(1.5);
+            z-index: 10;
+            background: #ffd700;
+            border-color: #ffa500;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-connect {
+            background: #51cf66;
+            color: white;
+        }
+
+        .btn-disconnect {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .connecting .status {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏙️ City Simulator</h1>
+        <p class="subtitle">Watch people randomly move across a 100x100 grid</p>
+
+        <div id="status" class="status disconnected">Disconnected</div>
+
+        <div class="grid-container">
+            <div id="grid" class="grid"></div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="people-count">0</div>
+                <div class="stat-label">People</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="update-count">0</div>
+                <div class="stat-label">Updates</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="fps">0</div>
+                <div class="stat-label">Updates/sec</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="connect-btn" class="btn-connect" onclick="connect()">Connect</button>
+            <button id="disconnect-btn" class="btn-disconnect" onclick="disconnect()" style="display:none;">Disconnect</button>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let updateCount = 0;
+        let lastUpdateTime = Date.now();
+        let fpsCounter = 0;
+
+        // Update FPS counter every second
+        setInterval(() => {
+            document.getElementById('fps').textContent = fpsCounter;
+            fpsCounter = 0;
+        }, 1000);
+
+        function connect() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/simulation/ws`;
+
+            document.getElementById('status').textContent = 'Connecting...';
+            document.getElementById('status').className = 'status connecting';
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('✅ Connected to WebSocket');
+                document.getElementById('status').textContent = '✅ Connected';
+                document.getElementById('status').className = 'status connected';
+                document.getElementById('connect-btn').style.display = 'none';
+                document.getElementById('disconnect-btn').style.display = 'inline-block';
+
+                // Send ping to keep connection alive
+                setInterval(() => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send('ping');
+                    }
+                }, 5000);
+            };
+
+            ws.onmessage = (event) => {
+                const people = JSON.parse(event.data);
+                updateGrid(people);
+
+                updateCount++;
+                fpsCounter++;
+                document.getElementById('update-count').textContent = updateCount;
+                document.getElementById('people-count').textContent = people.length;
+            };
+
+            ws.onerror = (error) => {
+                console.error('❌ WebSocket error:', error);
+                document.getElementById('status').textContent = '❌ Connection Error';
+                document.getElementById('status').className = 'status disconnected';
+            };
+
+            ws.onclose = () => {
+                console.log('🔌 Disconnected from WebSocket');
+                document.getElementById('status').textContent = '🔌 Disconnected';
+                document.getElementById('status').className = 'status disconnected';
+                document.getElementById('connect-btn').style.display = 'inline-block';
+                document.getElementById('disconnect-btn').style.display = 'none';
+                ws = null;
+            };
+        }
+
+        function disconnect() {
+            if (ws) {
+                ws.close();
+            }
+        }
+
+        function updateGrid(people) {
+            const grid = document.getElementById('grid');
+
+            // Create a map of existing people elements
+            const existingPeople = {};
+            grid.querySelectorAll('.person').forEach(el => {
+                existingPeople[el.dataset.id] = el;
+            });
+
+            // Update or create person elements
+            people.forEach(person => {
+                let personEl = existingPeople[person.id];
+
+                if (!personEl) {
+                    // Create new person element
+                    personEl = document.createElement('div');
+                    personEl.className = 'person';
+                    personEl.dataset.id = person.id;
+                    personEl.title = `Person ${person.id} (${person.x}, ${person.y})`;
+                    grid.appendChild(personEl);
+                } else {
+                    // Remove from existing map (so we know it's still active)
+                    delete existingPeople[person.id];
+                }
+
+                // Update position (convert 0-99 to percentage)
+                personEl.style.left = `${person.x}%`;
+                personEl.style.top = `${person.y}%`;
+                personEl.title = `Person ${person.id} (${person.x}, ${person.y})`;
+            });
+
+            // Remove any people that no longer exist
+            Object.values(existingPeople).forEach(el => el.remove());
+        }
+
+        // Auto-connect on page load
+        window.addEventListener('load', () => {
+            console.log('🚀 Page loaded, auto-connecting...');
+            connect();
+        });
+    </script>
+</body>
+</html>
+
