@@ -15,11 +15,11 @@ from app.routers.dependencies import get_simulation_service
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     echo("Simulation starting...")
-    task = asyncio.create_task(get_simulation_service().run())
+    simulation_task = asyncio.create_task(get_simulation_service().run())
     yield
 
     echo("Simulation stopping...")
-    task.cancel()
+    simulation_task.cancel()
 
 
 @dataclass
