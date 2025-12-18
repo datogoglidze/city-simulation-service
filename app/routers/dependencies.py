@@ -19,5 +19,5 @@ def get_people_service() -> PeopleService:
 def get_simulation_service() -> SimulationService:
     return SimulationService(
         websocket_manager=get_websocket_manager(),
-        people_service=get_people_service(),
+        people=get_people_service(),
     )

@@ -8,15 +8,15 @@ from app.runner.websocket import WebSocketManager
 @dataclass
 class SimulationService:
     websocket_manager: WebSocketManager
-    people_service: PeopleService
+    people: PeopleService
 
     async def broadcast_state(self) -> None:
         if self.websocket_manager.active_connections:
-            people_data = [asdict(person) for person in self.people_service.get_all()]
-            await self.websocket_manager.broadcast(people_data)
+            people = [asdict(person) for person in self.people.get_all()]
+            await self.websocket_manager.broadcast(people)
 
     async def run(self) -> None:
         while True:
-            self.people_service.update_positions()
+            self.people.update_positions()
             await self.broadcast_state()
             await asyncio.sleep(1)
