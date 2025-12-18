@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, WebSocket
 from fastapi.websockets import WebSocketDisconnect
 
-from app.routers.dependencies import get_manager
-from app.runner.websocket import ConnectionManager
+from app.routers.dependencies import get_websocket_manager
+from app.runner.websocket import WebSocketManager
 
 router = APIRouter(prefix="/simulation", tags=["Simulation"])
 
@@ -10,11 +10,11 @@ router = APIRouter(prefix="/simulation", tags=["Simulation"])
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
-    manager: ConnectionManager = Depends(get_manager),
+    websocket_manager: WebSocketManager = Depends(get_websocket_manager),
 ) -> None:
-    await manager.connect(websocket)
+    await websocket_manager.connect(websocket)
     try:
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        websocket_manager.disconnect(websocket)

@@ -4,7 +4,7 @@ from starlette.websockets import WebSocket
 
 
 @dataclass
-class ConnectionManager:
+class WebSocketManager:
     active_connections: list[WebSocket] = field(default_factory=list)
 
     async def connect(self, websocket: WebSocket) -> None:

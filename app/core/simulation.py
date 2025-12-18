@@ -3,18 +3,18 @@ import json
 from dataclasses import asdict, dataclass
 
 from app.core.people import PeopleService
-from app.runner.websocket import ConnectionManager
+from app.runner.websocket import WebSocketManager
 
 
 @dataclass
 class SimulationService:
-    manager: ConnectionManager
+    websocket_manager: WebSocketManager
     people_service: PeopleService
 
     async def broadcast_state(self) -> None:
-        if self.manager.active_connections:
+        if self.websocket_manager.active_connections:
             people_data = [asdict(person) for person in self.people_service.get_all()]
-            await self.manager.broadcast(json.dumps(people_data))
+            await self.websocket_manager.broadcast(json.dumps(people_data))
 
     async def run(self) -> None:
         while True:
