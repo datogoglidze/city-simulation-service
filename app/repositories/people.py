@@ -7,7 +7,7 @@ from app.core.person import Person
 
 @dataclass
 class PeopleJsonRepository:
-    snapshot_file: Path = Path("data/people_snapshot.json")
+    snapshot_file: Path
 
     def __post_init__(self) -> None:
         self.snapshot_file.parent.mkdir(exist_ok=True)
