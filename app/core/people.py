@@ -11,12 +11,7 @@ class PeopleService:
     people: list[Person] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:
-        snapshot = self.repository.load_snapshot()
-
-        if snapshot is None:
-            self.people = self.create_many()
-        else:
-            self.people = snapshot
+        self.people = self.repository.load_snapshot() or self.create_many()
 
     @staticmethod
     def create_many(count: int = 100) -> list[Person]:
