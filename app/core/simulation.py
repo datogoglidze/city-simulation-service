@@ -9,7 +9,7 @@ from app.runner.websocket import WebSocketManager
 class SimulationService:
     websocket_manager: WebSocketManager
     people: PeopleService
-    snapshot_interval: int = 50
+    snapshot_interval: int
 
     async def broadcast_state(self) -> None:
         if self.websocket_manager.active_connections:
