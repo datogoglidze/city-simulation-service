@@ -1,5 +1,4 @@
 import asyncio
-import json
 from dataclasses import asdict, dataclass
 
 from app.core.people import PeopleService
@@ -14,7 +13,7 @@ class SimulationService:
     async def broadcast_state(self) -> None:
         if self.websocket_manager.active_connections:
             people_data = [asdict(person) for person in self.people_service.get_all()]
-            await self.websocket_manager.broadcast(json.dumps(people_data))
+            await self.websocket_manager.broadcast(people_data)
 
     async def run(self) -> None:
         while True:
