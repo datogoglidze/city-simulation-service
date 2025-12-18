@@ -1,10 +1,11 @@
 from dataclasses import dataclass, field
+from typing import Any
 
 from starlette.websockets import WebSocket
 
 
 @dataclass
-class ConnectionManager:
+class WebSocketManager:
     active_connections: list[WebSocket] = field(default_factory=list)
 
     async def connect(self, websocket: WebSocket) -> None:
@@ -14,6 +15,6 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket) -> None:
         self.active_connections.remove(websocket)
 
-    async def broadcast(self, message: str) -> None:
+    async def broadcast(self, data: list[dict[str, Any]]) -> None:
         for connection in self.active_connections:
-            await connection.send_text(message)
+            await connection.send_json(data)

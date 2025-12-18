@@ -4,21 +4,22 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import AsyncGenerator
 
+from click import echo
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.routers import simulation
-from app.runner.websocket import ConnectionManager
+from app.routers import people, simulation
+from app.routers.dependencies import get_simulation_service
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    print("Simulation starting...")
-    task = asyncio.create_task(simulation.run_simulation(app.state.manager))
+    echo("Simulation starting...")
+    simulation_task = asyncio.create_task(get_simulation_service().run())
     yield
 
-    print("Simulation stopping...")
-    task.cancel()
+    echo("Simulation stopping...")
+    simulation_task.cancel()
 
 
 @dataclass
@@ -35,8 +36,7 @@ class FastApiConfig:
             lifespan=lifespan,
         )
 
-        app.state.manager = ConnectionManager()
-
+        app.include_router(people.router)
         app.include_router(simulation.router)
 
         static_dir = Path(__file__).parent.parent.parent / "static"
