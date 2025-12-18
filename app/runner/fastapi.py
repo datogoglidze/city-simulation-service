@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.routers import people, simulation
-from app.routers.dependencies import get_simulation_service
+from app.runner.dependencies import get_simulation_service
 
 
 @asynccontextmanager

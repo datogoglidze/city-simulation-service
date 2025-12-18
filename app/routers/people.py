@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.people import PeopleService
 from app.core.person import Person
-from app.routers.dependencies import get_people_service
+from app.runner.dependencies import get_people_service
 
 router = APIRouter(prefix="/people", tags=["People"])
 
