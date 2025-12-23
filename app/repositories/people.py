@@ -1,24 +1,31 @@
-import json
-from dataclasses import dataclass
-from pathlib import Path
+from dataclasses import dataclass, field
+from typing import Iterator
 
 from app.models.person import Person
 
 
 @dataclass
-class PeopleJsonRepository:
-    snapshot_file: Path
+class PeopleInMemoryRepository:
+    _people: dict[str, Person] = field(default_factory=dict)
 
-    def __post_init__(self) -> None:
-        self.snapshot_file.parent.mkdir(exist_ok=True)
+    def __len__(self) -> int:
+        return len(self._people)
 
-    def save_snapshot(self, people: list[Person]) -> None:
-        raw = [{"id": p.id, "x": p.x, "y": p.y} for p in people]
-        self.snapshot_file.write_text(json.dumps(raw, indent=2))
+    def __iter__(self) -> Iterator[Person]:
+        return iter(self._people.values())
 
-    def load_snapshot(self) -> list[Person] | None:
-        if not self.snapshot_file.exists():
-            return None
+    def read_all(self) -> list[Person]:
+        return list(self._people.values())
 
-        raw = json.loads(self.snapshot_file.read_text())
-        return [Person(**person) for person in raw]
+    def read_one(self, person_id: str) -> Person | None:
+        return self._people.get(person_id)
+
+    def create_one(self, person: Person) -> None:
+        self._people[person.id] = person
+
+    def delete_one(self, person_id: str) -> None:
+        self._people.pop(person_id, None)
+
+    def update_one(self, person: Person) -> None:
+        if person.id in self._people:
+            self._people[person.id] = person

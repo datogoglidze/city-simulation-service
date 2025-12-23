@@ -8,6 +8,10 @@ from starlette.websockets import WebSocket
 class WebSocketManager:
     active_connections: list[WebSocket] = field(default_factory=list)
 
+    @property
+    def has_active_connections(self) -> bool:
+        return bool(self.active_connections)
+
     async def connect(self, websocket: WebSocket) -> None:
         await websocket.accept()
         self.active_connections.append(websocket)

@@ -8,7 +8,7 @@ router = APIRouter(prefix="/people", tags=["People"])
 
 
 @router.get("/")
-def get_people(
+def read_all(
     people: PeopleService = Depends(get_people_service),
 ) -> list[Person]:
-    return people.get_all()
+    return people.read_all()
