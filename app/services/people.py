@@ -38,12 +38,12 @@ class PeopleService:
 
     def update_location(self) -> None:
         for person in self.people:
-            self._move_randomly_by_one(person)
+            new_location = self._random_neighboring_location(person)
+            updated_person = Person(id=person.id, location=new_location)
+            self.people.update_one(updated_person)
 
-    def _move_randomly_by_one(self, person: Person) -> None:
-        person.location.x = (
-            person.location.x + random.choice([-1, 0, 1])
-        ) % self.grid_size
-        person.location.y = (
-            person.location.y + random.choice([-1, 0, 1])
-        ) % self.grid_size
+    def _random_neighboring_location(self, person: Person) -> Location:
+        x = (person.location.x + random.choice([-1, 0, 1])) % self.grid_size
+        y = (person.location.y + random.choice([-1, 0, 1])) % self.grid_size
+
+        return Location(x=x, y=y)
