@@ -1,20 +1,26 @@
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from app.models.person import Person
+from app.repositories.people import PeopleInMemoryRepository
 from app.services.snapshot import SnapshotService
 
 
 @dataclass
 class PeopleService:
+    people: PeopleInMemoryRepository
     snapshot: SnapshotService
     grid_size: int
     people_amount: int
 
-    people: list[Person] = field(default_factory=list, init=False)
-
     def __post_init__(self) -> None:
-        self.people = self.snapshot.load() or self.create_many(count=self.people_amount)
+        loaded = self.snapshot.load()
+        if loaded:
+            for person in loaded:
+                self.people.add(person)
+        else:
+            for person in self.create_many(count=self.people_amount):
+                self.people.add(person)
 
     def create_many(self, count: int) -> list[Person]:
         return [
@@ -27,10 +33,10 @@ class PeopleService:
         ]
 
     def get_all(self) -> list[Person]:
-        return self.people
+        return self.people.get_all()
 
     def update_positions(self) -> None:
-        for person in self.people:
+        for person in self.people.get_all():
             self._move_randomly_by_one(person)
 
     def _move_randomly_by_one(self, person: Person) -> None:

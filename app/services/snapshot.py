@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 
 from app.models.person import Person
-from app.repositories.people import PeopleJsonRepository
+from app.repositories.people_snapshot import PeopleJsonSnapshotRepository
 
 
 @dataclass
 class SnapshotService:
-    repository: PeopleJsonRepository
+    repository: PeopleJsonSnapshotRepository
 
     def save(self, people: list[Person]) -> None:
         self.repository.save_snapshot(people)
