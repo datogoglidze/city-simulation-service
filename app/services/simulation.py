@@ -12,7 +12,7 @@ class SimulationService:
     snapshot_interval: int
 
     async def broadcast_state(self) -> None:
-        if self.websocket_manager.active_connections:
+        if self.websocket_manager.has_active_connections:
             people = [asdict(person) for person in self.people.get_all()]
             await self.websocket_manager.broadcast(people)
 
