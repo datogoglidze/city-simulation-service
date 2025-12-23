@@ -14,19 +14,19 @@ class PeopleInMemoryRepository:
     def __iter__(self) -> Iterator[Person]:
         return iter(self._people.values())
 
-    def get_all(self) -> list[Person]:
+    def read_all(self) -> list[Person]:
         return list(self._people.values())
 
-    def get(self, person_id: str) -> Person | None:
+    def read_one(self, person_id: str) -> Person | None:
         return self._people.get(person_id)
 
-    def add(self, person: Person) -> None:
+    def create_one(self, person: Person) -> None:
         self._people[person.id] = person
 
-    def delete(self, person_id: str) -> None:
+    def delete_one(self, person_id: str) -> None:
         self._people.pop(person_id, None)
 
-    def update_position(self, person_id: str, location: Location) -> None:
+    def update_one(self, person_id: str, location: Location) -> None:
         person = self._people.get(person_id)
         if person:
             person.location = location

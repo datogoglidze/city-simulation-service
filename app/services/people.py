@@ -17,10 +17,10 @@ class PeopleService:
         loaded = self.snapshot.load()
         if loaded:
             for person in loaded:
-                self.people.add(person)
+                self.people.create_one(person)
         else:
             for person in self.create_many(count=self.people_amount):
-                self.people.add(person)
+                self.people.create_one(person)
 
     def create_many(self, count: int) -> list[Person]:
         return [
@@ -33,11 +33,11 @@ class PeopleService:
             for _ in range(count)
         ]
 
-    def get_all(self) -> list[Person]:
-        return self.people.get_all()
+    def read_all(self) -> list[Person]:
+        return list(self.people)
 
-    def update_positions(self) -> None:
-        for person in self.people.get_all():
+    def update_location(self) -> None:
+        for person in self.people.read_all():
             self._move_randomly_by_one(person)
 
     def _move_randomly_by_one(self, person: Person) -> None:
