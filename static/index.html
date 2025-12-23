@@ -296,7 +296,7 @@
                     personEl = document.createElement('div');
                     personEl.className = 'person';
                     personEl.dataset.id = person.id;
-                    personEl.title = `Person ${person.id} (${person.x}, ${person.y})`;
+                    personEl.title = `Person ${person.id} (${person.location.x}, ${person.location.y})`;
                     grid.appendChild(personEl);
                 } else {
                     // Remove from existing map (so we know it's still active)
@@ -304,9 +304,9 @@
                 }
 
                 // Update position (convert 0-99 to percentage)
-                personEl.style.left = `${person.x}%`;
-                personEl.style.top = `${person.y}%`;
-                personEl.title = `Person ${person.id} (${person.x}, ${person.y})`;
+                personEl.style.left = `${person.location.x}%`;
+                personEl.style.top = `${person.location.y}%`;
+                personEl.title = `Person ${person.id} (${person.location.x}, ${person.location.y})`;
             });
 
             // Remove any people that no longer exist

@@ -1,7 +1,7 @@
 import random
 from dataclasses import dataclass
 
-from app.models.person import Person
+from app.models.person import Location, Person
 from app.repositories.people import PeopleInMemoryRepository
 from app.repositories.people_snapshot import SnapshotJsonRepository
 
@@ -26,8 +26,10 @@ class PeopleService:
         return [
             Person(
                 id=i,
-                x=random.randint(0, self.grid_size - 1),
-                y=random.randint(0, self.grid_size - 1),
+                location=Location(
+                    x=random.randint(0, self.grid_size - 1),
+                    y=random.randint(0, self.grid_size - 1),
+                ),
             )
             for i in range(count)
         ]
@@ -40,5 +42,9 @@ class PeopleService:
             self._move_randomly_by_one(person)
 
     def _move_randomly_by_one(self, person: Person) -> None:
-        person.x = (person.x + random.choice([-1, 0, 1])) % self.grid_size
-        person.y = (person.y + random.choice([-1, 0, 1])) % self.grid_size
+        person.location.x = (
+            person.location.x + random.choice([-1, 0, 1])
+        ) % self.grid_size
+        person.location.y = (
+            person.location.y + random.choice([-1, 0, 1])
+        ) % self.grid_size

@@ -1,8 +1,8 @@
 import json
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from app.models.person import Person
+from app.models.person import Location, Person
 
 
 @dataclass
@@ -13,7 +13,7 @@ class SnapshotJsonRepository:
         self.snapshot_file.parent.mkdir(exist_ok=True)
 
     def save(self, people: list[Person]) -> None:
-        raw = [{"id": p.id, "x": p.x, "y": p.y} for p in people]
+        raw = [asdict(p) for p in people]
         self.snapshot_file.write_text(json.dumps(raw, indent=2))
 
     def load(self) -> list[Person] | None:
@@ -21,4 +21,8 @@ class SnapshotJsonRepository:
             return None
 
         raw = json.loads(self.snapshot_file.read_text())
-        return [Person(**person) for person in raw]
+
+        return [
+            Person(id=person["id"], location=Location(**person["location"]))
+            for person in raw
+        ]

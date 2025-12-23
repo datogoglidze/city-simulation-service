@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Iterator
 
-from app.models.person import Person
+from app.models.person import Location, Person
 
 
 @dataclass
@@ -26,8 +26,7 @@ class PeopleInMemoryRepository:
     def delete(self, person_id: int) -> None:
         self._people.pop(person_id, None)
 
-    def update_position(self, person_id: int, x: int, y: int) -> None:
+    def update_position(self, person_id: int, location: Location) -> None:
         person = self._people.get(person_id)
         if person:
-            person.x = x
-            person.y = y
+            person.location = location
