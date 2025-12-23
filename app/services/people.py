@@ -25,13 +25,12 @@ class PeopleService:
     def create_many(self, count: int) -> list[Person]:
         return [
             Person(
-                id=i,
                 location=Location(
                     x=random.randint(0, self.grid_size - 1),
                     y=random.randint(0, self.grid_size - 1),
                 ),
             )
-            for i in range(count)
+            for _ in range(count)
         ]
 
     def get_all(self) -> list[Person]:

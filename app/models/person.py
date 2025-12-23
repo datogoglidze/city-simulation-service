@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from uuid import uuid4
 
 
 @dataclass
@@ -9,5 +10,6 @@ class Location:
 
 @dataclass
 class Person:
-    id: int
     location: Location
+
+    id: str = field(default_factory=lambda: str(uuid4()))

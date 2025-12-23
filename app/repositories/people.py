@@ -6,7 +6,7 @@ from app.models.person import Location, Person
 
 @dataclass
 class PeopleInMemoryRepository:
-    _people: dict[int, Person] = field(default_factory=dict)
+    _people: dict[str, Person] = field(default_factory=dict)
 
     def __len__(self) -> int:
         return len(self._people)
@@ -17,16 +17,16 @@ class PeopleInMemoryRepository:
     def get_all(self) -> list[Person]:
         return list(self._people.values())
 
-    def get(self, person_id: int) -> Person | None:
+    def get(self, person_id: str) -> Person | None:
         return self._people.get(person_id)
 
     def add(self, person: Person) -> None:
         self._people[person.id] = person
 
-    def delete(self, person_id: int) -> None:
+    def delete(self, person_id: str) -> None:
         self._people.pop(person_id, None)
 
-    def update_position(self, person_id: int, location: Location) -> None:
+    def update_position(self, person_id: str, location: Location) -> None:
         person = self._people.get(person_id)
         if person:
             person.location = location
