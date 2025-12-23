@@ -3,11 +3,13 @@ from dataclasses import asdict, dataclass
 
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
+from app.services.snapshot import SnapshotService
 
 
 @dataclass
 class SimulationService:
     websocket_manager: WebSocketManager
+    snapshot: SnapshotService
     people: PeopleService
     snapshot_interval: int
 
@@ -24,7 +26,7 @@ class SimulationService:
 
             iteration += 1
             if iteration == self.snapshot_interval:
-                self.people.save_snapshot()
+                self.snapshot.save(self.people.get_all())
                 iteration = 0
 
             await asyncio.sleep(1)

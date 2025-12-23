@@ -6,6 +6,7 @@ from app.repositories.people import PeopleJsonRepository
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
+from app.services.snapshot import SnapshotService
 
 
 @cache
@@ -14,11 +15,16 @@ def get_people_repository() -> PeopleJsonRepository:
 
 
 @cache
+def get_snapshots() -> SnapshotService:
+    return SnapshotService(repository=get_people_repository())
+
+
+@cache
 def get_people_service() -> PeopleService:
     return PeopleService(
-        repository=get_people_repository(),
         grid_size=config.GRID_SIZE,
         people_amount=config.PEOPLE_AMOUNT,
+        snapshot=get_snapshots(),
     )
 
 
@@ -33,4 +39,5 @@ def get_simulation_service() -> SimulationService:
         websocket_manager=get_websocket_manager(),
         people=get_people_service(),
         snapshot_interval=config.SNAPSHOT_INTERVAL,
+        snapshot=get_snapshots(),
     )

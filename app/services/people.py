@@ -2,21 +2,19 @@ import random
 from dataclasses import dataclass, field
 
 from app.models.person import Person
-from app.repositories.people import PeopleJsonRepository
+from app.services.snapshot import SnapshotService
 
 
 @dataclass
 class PeopleService:
-    repository: PeopleJsonRepository
+    snapshot: SnapshotService
     grid_size: int
     people_amount: int
 
     people: list[Person] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:
-        self.people = self.repository.load_snapshot() or self.create_many(
-            count=self.people_amount
-        )
+        self.people = self.snapshot.load() or self.create_many(count=self.people_amount)
 
     def create_many(self, count: int) -> list[Person]:
         return [
@@ -38,6 +36,3 @@ class PeopleService:
     def _move_randomly_by_one(self, person: Person) -> None:
         person.x = (person.x + random.choice([-1, 0, 1])) % self.grid_size
         person.y = (person.y + random.choice([-1, 0, 1])) % self.grid_size
-
-    def save_snapshot(self) -> None:
-        self.repository.save_snapshot(self.people)
