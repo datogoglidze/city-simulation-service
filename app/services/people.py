@@ -33,8 +33,11 @@ class PeopleService:
 
     def update_positions(self) -> None:
         for person in self.people:
-            person.x = (person.x + random.choice([-1, 0, 1])) % self.grid_size
-            person.y = (person.y + random.choice([-1, 0, 1])) % self.grid_size
+            self._move_randomly_by_one(person)
+
+    def _move_randomly_by_one(self, person: Person) -> None:
+        person.x = (person.x + random.choice([-1, 0, 1])) % self.grid_size
+        person.y = (person.y + random.choice([-1, 0, 1])) % self.grid_size
 
     def save_snapshot(self) -> None:
         self.repository.save_snapshot(self.people)
