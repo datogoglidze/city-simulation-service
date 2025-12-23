@@ -3,13 +3,13 @@ from dataclasses import dataclass
 
 from app.models.person import Person
 from app.repositories.people import PeopleInMemoryRepository
-from app.services.snapshot import SnapshotService
+from app.repositories.people_snapshot import SnapshotJsonRepository
 
 
 @dataclass
 class PeopleService:
     people: PeopleInMemoryRepository
-    snapshot: SnapshotService
+    snapshot: SnapshotJsonRepository
     grid_size: int
     people_amount: int
 

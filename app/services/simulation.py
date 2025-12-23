@@ -1,15 +1,15 @@
 import asyncio
 from dataclasses import asdict, dataclass
 
+from app.repositories.people_snapshot import SnapshotJsonRepository
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
-from app.services.snapshot import SnapshotService
 
 
 @dataclass
 class SimulationService:
     websocket_manager: WebSocketManager
-    snapshot: SnapshotService
+    snapshot: SnapshotJsonRepository
     people: PeopleService
     snapshot_interval: int
 

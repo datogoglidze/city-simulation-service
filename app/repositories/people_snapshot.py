@@ -6,17 +6,17 @@ from app.models.person import Person
 
 
 @dataclass
-class PeopleJsonSnapshotRepository:
+class SnapshotJsonRepository:
     snapshot_file: Path
 
     def __post_init__(self) -> None:
         self.snapshot_file.parent.mkdir(exist_ok=True)
 
-    def save_snapshot(self, people: list[Person]) -> None:
+    def save(self, people: list[Person]) -> None:
         raw = [{"id": p.id, "x": p.x, "y": p.y} for p in people]
         self.snapshot_file.write_text(json.dumps(raw, indent=2))
 
-    def load_snapshot(self) -> list[Person] | None:
+    def load(self) -> list[Person] | None:
         if not self.snapshot_file.exists():
             return None
 
