@@ -37,7 +37,7 @@ class PeopleService:
         return list(self.people)
 
     def update_location(self) -> None:
-        for person in self.people.read_all():
+        for person in self.people:
             self._move_randomly_by_one(person)
 
     def _move_randomly_by_one(self, person: Person) -> None:
