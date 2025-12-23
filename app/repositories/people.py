@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from app.core.person import Person
+from app.models.person import Person
 
 
 @dataclass

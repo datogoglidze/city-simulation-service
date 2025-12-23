@@ -1,7 +1,7 @@
 import random
 from dataclasses import dataclass, field
 
-from app.core.person import Person
+from app.models.person import Person
 from app.repositories.people import PeopleJsonRepository
 
 
