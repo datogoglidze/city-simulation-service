@@ -1,8 +1,8 @@
 import asyncio
 from dataclasses import asdict, dataclass
 
-from app.core.people import PeopleService
 from app.runner.websocket import WebSocketManager
+from app.services.people import PeopleService
 
 
 @dataclass

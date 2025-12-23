@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from app.core.people import PeopleService
-from app.core.person import Person
+from app.models.person import Person
 from app.runner.dependencies import get_people_service
+from app.services.people import PeopleService
 
 router = APIRouter(prefix="/people", tags=["People"])
 

@@ -2,10 +2,10 @@ from functools import cache
 from pathlib import Path
 
 from app.config import config
-from app.core.people import PeopleService
-from app.core.simulation import SimulationService
 from app.repositories.people import PeopleJsonRepository
 from app.runner.websocket import WebSocketManager
+from app.services.people import PeopleService
+from app.services.simulation import SimulationService
 
 
 @cache
