@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from starlette import status
 
+from app.config import config
 from app.models.person import Location, Person
 from app.runner.dependencies import get_people_service
 from app.services.people import PeopleService
@@ -10,8 +11,8 @@ router = APIRouter(prefix="/people", tags=["People"])
 
 
 class PersonLocation(BaseModel):
-    x: int
-    y: int
+    x: int = Field(ge=0, lt=config.GRID_SIZE)
+    y: int = Field(ge=0, lt=config.GRID_SIZE)
 
 
 class PersonCreate(BaseModel):
