@@ -20,8 +20,10 @@ class PeopleInMemoryRepository:
     def read_one(self, person_id: str) -> Person | None:
         return self._people.get(person_id)
 
-    def create_one(self, person: Person) -> None:
+    def create_one(self, person: Person) -> Person:
         self._people[person.id] = person
+
+        return person
 
     def delete_one(self, person_id: str) -> None:
         self._people.pop(person_id, None)

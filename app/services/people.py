@@ -33,8 +33,17 @@ class PeopleService:
             for _ in range(count)
         ]
 
+    def create_one(self, person: Person) -> Person:
+        return self.people.create_one(person)
+
     def read_all(self) -> list[Person]:
         return list(self.people)
+
+    def read_one(self, person_id: str) -> Person | None:
+        return self.people.read_one(person_id)
+
+    def delete_one(self, person_id: str) -> None:
+        self.people.delete_one(person_id)
 
     def update_location(self) -> None:
         for person in self.people:
