@@ -30,8 +30,19 @@ class PersonRead(BaseModel):
 )
 def read_all(
     people: PeopleService = Depends(get_people_service),
-) -> list[Person]:
-    return people.read_all()
+) -> list[PersonRead]:
+    _people = people.read_all()
+
+    return [
+        PersonRead(
+            id=person.id,
+            location=PersonLocation(
+                x=person.location.x,
+                y=person.location.y,
+            ),
+        )
+        for person in _people
+    ]
 
 
 @router.get(
@@ -41,12 +52,18 @@ def read_all(
 )
 def read_one(
     person_id: str, people: PeopleService = Depends(get_people_service)
-) -> Person:
-    person = people.read_one(person_id)
-    if not person:
+) -> PersonRead:
+    _person = people.read_one(person_id)
+    if _person is None:
         raise HTTPException(status_code=404, detail="Person not found")
 
-    return person
+    return PersonRead(
+        id=_person.id,
+        location=PersonLocation(
+            x=_person.location.x,
+            y=_person.location.y,
+        ),
+    )
 
 
 @router.post(
@@ -56,10 +73,23 @@ def read_one(
 )
 def create_one(
     person: PersonCreate, people: PeopleService = Depends(get_people_service)
-) -> Person:
-    _person = Person(Location(**person.location.model_dump()))
+) -> PersonRead:
+    _person = Person(
+        location=Location(
+            x=person.location.x,
+            y=person.location.y,
+        )
+    )
 
-    return people.create_one(_person)
+    created = people.create_one(_person)
+
+    return PersonRead(
+        id=created.id,
+        location=PersonLocation(
+            x=created.location.x,
+            y=created.location.y,
+        ),
+    )
 
 
 @router.delete(
