@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from starlette import status
 
 from app.config import config
+from app.models.errors import DoesNotExistError, ExistsError
 from app.models.person import Location, Person
 from app.runner.dependencies import get_people_service
 from app.services.people import PeopleService
@@ -54,9 +55,10 @@ def read_all(
 def read_one(
     person_id: str, people: PeopleService = Depends(get_people_service)
 ) -> PersonRead:
-    _person = people.read_one(person_id)
-    if _person is None:
-        raise HTTPException(status_code=404, detail="Person not found")
+    try:
+        _person = people.read_one(person_id)
+    except DoesNotExistError as e:
+        raise HTTPException(status_code=404, detail=f"Person with id {e.id} not found")
 
     return PersonRead(
         id=_person.id,
@@ -82,7 +84,12 @@ def create_one(
         )
     )
 
-    created = people.create_one(_person)
+    try:
+        created = people.create_one(_person)
+    except ExistsError as e:
+        raise HTTPException(
+            status_code=409, detail=f"Person with id {e.id} already exists"
+        )
 
     return PersonRead(
         id=created.id,
@@ -101,4 +108,7 @@ def create_one(
 def delete_one(
     person_id: str, people: PeopleService = Depends(get_people_service)
 ) -> None:
-    people.delete_one(person_id)
+    try:
+        people.delete_one(person_id)
+    except DoesNotExistError as e:
+        raise HTTPException(status_code=404, detail=f"Person with id {e.id} not found")
