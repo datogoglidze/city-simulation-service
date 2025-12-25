@@ -15,6 +15,12 @@ pydantic = "^2.12.5"
 typer = "^0.20.0"
 websockets = "^15.0.1"
 
+[tool.poetry.group.dev.dependencies]
+coverage = "*"
+faker = "*"
+pytest = "*"
+pytest-cov = "*"
+
 [tool.poetry.group.lint.dependencies]
 mypy = "*"
 ruff = "*"
@@ -38,5 +44,22 @@ lint.ignore = []
 lint.fixable = ["A", "B", "C", "D", "E", "F", "I"]
 lint.unfixable = []
 
+[tool.ruff.lint.isort]
+forced-separate = ["tests", "app"]
+
 [tool.ruff.lint.mccabe]
 max-complexity = 10
+
+[tool.coverage.run]
+branch = true
+source = [
+    "app/models",
+    "app/repositories",
+    "app/routers",
+    "app/services",
+]
+
+[tool.coverage.report]
+skip_empty = true
+skip_covered = true
+show_missing = true
