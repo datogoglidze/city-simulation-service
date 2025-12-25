@@ -9,13 +9,15 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.routers import people, simulation
-from app.runner.dependencies import get_simulation_service
+from app.runner.websocket import WebSocketManager
+from app.services.people import PeopleService
+from app.services.simulation import SimulationService
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     echo("Simulation starting...")
-    simulation_task = asyncio.create_task(get_simulation_service().run())
+    simulation_task = asyncio.create_task(app.state.simulation.run())
     yield
 
     echo("Simulation stopping...")
@@ -24,6 +26,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 @dataclass
 class FastApiConfig:
+    websocket: WebSocketManager
+    simulation: SimulationService
+    people: PeopleService
+
     title: str = "City Simulator"
     description: str = "Simulates city behavior"
     version: str = "0.1.0"
@@ -36,8 +42,12 @@ class FastApiConfig:
             lifespan=lifespan,
         )
 
-        app.include_router(people.router)
+        app.state.websocket = self.websocket
+        app.state.simulation = self.simulation
+        app.state.people = self.people
+
         app.include_router(simulation.router)
+        app.include_router(people.router)
 
         static_dir = Path(__file__).parent.parent.parent / "static"
         if static_dir.exists():

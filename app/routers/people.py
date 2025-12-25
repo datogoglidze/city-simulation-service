@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from starlette import status
 
 from app.config import config
 from app.models.errors import DoesNotExistError, ExistsError
 from app.models.person import Location, Person
-from app.runner.dependencies import get_people_service
-from app.services.people import PeopleService
+from app.runner.dependencies import PeopleServiceDependable
 
 router = APIRouter(prefix="/people", tags=["People"])
 
@@ -30,9 +29,7 @@ class PersonRead(BaseModel):
     status_code=status.HTTP_200_OK,
     response_model=list[PersonRead],
 )
-def read_all(
-    people: PeopleService = Depends(get_people_service),
-) -> list[PersonRead]:
+def read_all(people: PeopleServiceDependable) -> list[PersonRead]:
     _people = people.read_all()
 
     return [
@@ -52,9 +49,7 @@ def read_all(
     status_code=status.HTTP_200_OK,
     response_model=PersonRead,
 )
-def read_one(
-    person_id: str, people: PeopleService = Depends(get_people_service)
-) -> PersonRead:
+def read_one(person_id: str, people: PeopleServiceDependable) -> PersonRead:
     try:
         _person = people.read_one(person_id)
     except DoesNotExistError as e:
@@ -74,9 +69,7 @@ def read_one(
     status_code=status.HTTP_201_CREATED,
     response_model=PersonRead,
 )
-def create_one(
-    person: PersonCreate, people: PeopleService = Depends(get_people_service)
-) -> PersonRead:
+def create_one(person: PersonCreate, people: PeopleServiceDependable) -> PersonRead:
     _person = Person(
         location=Location(
             x=person.location.x,
@@ -105,9 +98,7 @@ def create_one(
     status_code=status.HTTP_204_NO_CONTENT,
     response_model=None,
 )
-def delete_one(
-    person_id: str, people: PeopleService = Depends(get_people_service)
-) -> None:
+def delete_one(person_id: str, people: PeopleServiceDependable) -> None:
     try:
         people.delete_one(person_id)
     except DoesNotExistError as e:

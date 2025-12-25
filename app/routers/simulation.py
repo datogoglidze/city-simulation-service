@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends, WebSocket
+from fastapi import APIRouter, WebSocket
 from fastapi.websockets import WebSocketDisconnect
 
-from app.runner.dependencies import get_websocket_manager
-from app.runner.websocket import WebSocketManager
+from app.runner.dependencies import WebSocketManagerDependable
 
 router = APIRouter(prefix="/simulation", tags=["Simulation"])
 
@@ -10,7 +9,7 @@ router = APIRouter(prefix="/simulation", tags=["Simulation"])
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
-    websocket_manager: WebSocketManager = Depends(get_websocket_manager),
+    websocket_manager: WebSocketManagerDependable,
 ) -> None:
     await websocket_manager.connect(websocket)
     try:
