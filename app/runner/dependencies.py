@@ -1,44 +1,21 @@
-from functools import cache
-from pathlib import Path
+from typing import Annotated
 
-from app.config import config
-from app.repositories.people import PeopleInMemoryRepository
-from app.repositories.people_snapshot import SnapshotJsonRepository
+from fastapi import Depends, WebSocket
+from starlette.requests import Request
+
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
-from app.services.simulation import SimulationService
 
 
-@cache
-def get_snapshot_repository() -> SnapshotJsonRepository:
-    return SnapshotJsonRepository(snapshot_file=Path(config.SNAPSHOT_PATH))
+def get_people_service(request: Request) -> PeopleService:
+    return request.app.state.people  # type: ignore
 
 
-@cache
-def get_people_repository() -> PeopleInMemoryRepository:
-    return PeopleInMemoryRepository()
+PeopleServiceDependable = Annotated[PeopleService, Depends(get_people_service)]
 
 
-@cache
-def get_people_service() -> PeopleService:
-    return PeopleService(
-        people=get_people_repository(),
-        snapshot=get_snapshot_repository(),
-        grid_size=config.GRID_SIZE,
-        people_amount=config.PEOPLE_AMOUNT,
-    )
+def get_websocket_manager(websocket: WebSocket) -> WebSocketManager:
+    return websocket.app.state.websocket  # type: ignore
 
 
-@cache
-def get_websocket_manager() -> WebSocketManager:
-    return WebSocketManager()
-
-
-@cache
-def get_simulation_service() -> SimulationService:
-    return SimulationService(
-        websocket_manager=get_websocket_manager(),
-        people=get_people_service(),
-        snapshot_interval=config.SNAPSHOT_INTERVAL,
-        snapshot=get_snapshot_repository(),
-    )
+WebSocketManagerDependable = Annotated[WebSocketManager, Depends(get_websocket_manager)]
