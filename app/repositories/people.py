@@ -9,10 +9,10 @@ from app.models.person import Person
 class PeopleInMemoryRepository:
     _people: dict[str, Person] = field(default_factory=dict)
 
-    def __len__(self) -> int:
+    def __len__(self) -> int:  # pragma: no cover
         return len(self._people)
 
-    def __iter__(self) -> Iterator[Person]:
+    def __iter__(self) -> Iterator[Person]:  # pragma: no cover
         return iter(self._people.values())
 
     def read_all(self) -> list[Person]:

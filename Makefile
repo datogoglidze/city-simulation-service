@@ -22,5 +22,9 @@ lint:
 	poetry run ruff check  app
 	poetry run mypy app
 
+
+test:
+	poetry run pytest tests/unit --cov
+
 run:
 	python -m app.runner --host localhost --port 8000
