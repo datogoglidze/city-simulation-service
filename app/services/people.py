@@ -2,7 +2,7 @@ import random
 from contextlib import suppress
 from dataclasses import dataclass
 
-from app.models.errors import DoesNotExistError, ExistsError
+from app.models.errors import DoesNotExistError
 from app.models.person import Location, Person
 from app.repositories.people import PeopleInMemoryRepository
 from app.repositories.people_snapshot import SnapshotJsonRepository
@@ -16,26 +16,25 @@ class PeopleService:
     people_amount: int
 
     def __post_init__(self) -> None:
-        loaded = self.snapshot.load()
-        if loaded:
-            for person in loaded:
-                with suppress(ExistsError):
-                    self.people.create_one(person)
-        else:
-            for person in self.create_many(count=self.people_amount):
-                with suppress(ExistsError):
-                    self.people.create_one(person)
+        snapshot = self.snapshot.load()
 
-    def create_many(self, count: int) -> list[Person]:
-        return [
-            Person(
-                location=Location(
-                    x=random.randint(0, self.grid_size - 1),
-                    y=random.randint(0, self.grid_size - 1),
-                ),
+        if not snapshot:
+            self.create_random(count=self.people_amount)
+            return
+
+        for person in snapshot:
+            self.people.create_one(person)
+
+    def _random_person(self) -> Person:
+        return Person(
+            location=Location(
+                x=random.randint(0, self.grid_size - 1),
+                y=random.randint(0, self.grid_size - 1),
             )
-            for _ in range(count)
-        ]
+        )
+
+    def create_random(self, count: int) -> list[Person]:
+        return [self.people.create_one(self._random_person()) for _ in range(count)]
 
     def create_one(self, person: Person) -> Person:
         return self.people.create_one(person)
