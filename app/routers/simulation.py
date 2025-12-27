@@ -1,7 +1,10 @@
 from fastapi import APIRouter, WebSocket
 from fastapi.websockets import WebSocketDisconnect
 
-from app.runner.dependencies import WebSocketManagerDependable
+from app.runner.dependencies import (
+    SimulationServiceDependable,
+    WebSocketManagerDependable,
+)
 
 router = APIRouter(prefix="/simulation", tags=["Simulation"])
 
@@ -10,8 +13,11 @@ router = APIRouter(prefix="/simulation", tags=["Simulation"])
 async def websocket_endpoint(
     websocket: WebSocket,
     websocket_manager: WebSocketManagerDependable,
+    simulation: SimulationServiceDependable,
 ) -> None:
     await websocket_manager.connect(websocket)
+    await simulation.broadcast_state()
+
     try:
         while True:
             await websocket.receive_text()
