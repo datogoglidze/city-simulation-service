@@ -13,11 +13,9 @@ router = APIRouter(prefix="/simulation", tags=["Simulation"])
 async def websocket_endpoint(
     websocket: WebSocket,
     websocket_manager: WebSocketManagerDependable,
-    simulation: SimulationServiceDependable,
 ) -> None:
     await websocket_manager.connect(websocket)
-    # Send initial state to the newly connected client only
-    await simulation.send_state_to(websocket)
+    # Client will receive updates from the simulation loop
 
     try:
         while True:
