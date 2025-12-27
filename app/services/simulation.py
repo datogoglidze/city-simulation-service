@@ -13,10 +13,20 @@ class SimulationService:
     people: PeopleService
     snapshot_interval: int
 
+    def _get_current_state(self) -> list[dict]:
+        """Get the current simulation state."""
+        return [asdict(person) for person in self.people.read_all()]
+
+    async def send_state_to(self, websocket) -> None:
+        """Send current state to a specific client."""
+        state = self._get_current_state()
+        await self.websocket_manager.send(websocket, state)
+
     async def broadcast_state(self) -> None:
+        """Broadcast current state to all connected clients."""
         if self.websocket_manager.has_active_connections:
-            people = [asdict(person) for person in self.people.read_all()]
-            await self.websocket_manager.broadcast(people)
+            state = self._get_current_state()
+            await self.websocket_manager.broadcast(state)
 
     async def run(self) -> None:
         iteration = 0

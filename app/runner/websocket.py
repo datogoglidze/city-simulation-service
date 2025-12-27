@@ -19,6 +19,11 @@ class WebSocketManager:
     def disconnect(self, websocket: WebSocket) -> None:
         self.active_connections.remove(websocket)
 
+    async def send(self, websocket: WebSocket, data: list[dict[str, Any]]) -> None:
+        """Send data to a specific client."""
+        await websocket.send_json(data)
+
     async def broadcast(self, data: list[dict[str, Any]]) -> None:
+        """Send data to all connected clients."""
         for connection in self.active_connections:
             await connection.send_json(data)

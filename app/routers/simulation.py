@@ -16,8 +16,8 @@ async def websocket_endpoint(
     simulation: SimulationServiceDependable,
 ) -> None:
     await websocket_manager.connect(websocket)
-    # Send initial state immediately when client connects
-    await simulation.broadcast_state()
+    # Send initial state to the newly connected client only
+    await simulation.send_state_to(websocket)
 
     try:
         while True:
