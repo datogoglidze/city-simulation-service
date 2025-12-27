@@ -13,18 +13,18 @@ update:
 	poetry update
 
 format:
-	poetry run ruff format app
-	poetry run ruff check  app --fix
+	poetry run ruff format app tests
+	poetry run ruff check  app tests --fix
 
 lint:
 	poetry check --strict
-	poetry run ruff format app --check
-	poetry run ruff check  app
-	poetry run mypy app
+	poetry run ruff format app tests --check
+	poetry run ruff check app tests
+	poetry run mypy app tests
 
 
 test:
-	poetry run pytest tests/unit tests/integration --cov
+	poetry run pytest tests --cov
 
 run:
 	python -m app.runner --host localhost --port 8000

@@ -9,7 +9,7 @@ def test_should_broadcast_person_via_websocket(client: TestClient) -> None:
     client.post("/people", json={"location": {"x": 1, "y": 1}})
 
     with client.websocket_connect("/simulation/ws") as websocket:
-        asyncio.run(client.app.state.simulation.broadcast_state())
+        asyncio.run(client.app.state.simulation.broadcast_state())  # type: ignore
 
         data = websocket.receive_json()
 
@@ -24,15 +24,15 @@ def test_should_broadcast_updated_locations(client: TestClient) -> None:
     client.post("/people", json={"location": {"x": 0, "y": 0}})
 
     with client.websocket_connect("/simulation/ws") as websocket:
-        asyncio.run(client.app.state.simulation.broadcast_state())
+        asyncio.run(client.app.state.simulation.broadcast_state())  # type: ignore
 
         first_data = websocket.receive_json()
         assert len(first_data) == 1
         assert first_data == [{"id": ANY, "location": {"x": 0, "y": 0}}]
 
-        client.app.state.people.update_location()
+        client.app.state.people.update_location()  # type: ignore
 
-        asyncio.run(client.app.state.simulation.broadcast_state())
+        asyncio.run(client.app.state.simulation.broadcast_state())  # type: ignore
 
         second_data = websocket.receive_json()
         assert len(second_data) == 1
