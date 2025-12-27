@@ -24,7 +24,7 @@ lint:
 
 
 test:
-	poetry run pytest tests/unit --cov
+	poetry run pytest tests/unit tests/integration --cov
 
 run:
 	python -m app.runner --host localhost --port 8000
