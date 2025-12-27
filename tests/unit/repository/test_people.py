@@ -1,7 +1,7 @@
 import pytest
 
 from app.models.errors import DoesNotExistError, ExistsError
-from app.models.person import Person, Location
+from app.models.person import Location, Person
 from app.repositories.people import PeopleInMemoryRepository
 
 
@@ -10,13 +10,15 @@ def people() -> PeopleInMemoryRepository:
     return PeopleInMemoryRepository()
 
 
-def test_should_read_nothing_when_nothing_exist(people: PeopleInMemoryRepository):
+def test_should_read_nothing_when_nothing_exist(
+    people: PeopleInMemoryRepository,
+) -> None:
     existing_people = people.read_all()
 
     assert len(existing_people) == 0
 
 
-def test_should_create_one(people: PeopleInMemoryRepository):
+def test_should_create_one(people: PeopleInMemoryRepository) -> None:
     person = Person(id="1", location=Location(x=0, y=0))
 
     people.create_one(person)
@@ -24,7 +26,7 @@ def test_should_create_one(people: PeopleInMemoryRepository):
     assert len(people.read_all()) == 1
 
 
-def test_should_not_duplicate_on_create_one(people: PeopleInMemoryRepository):
+def test_should_not_duplicate_on_create_one(people: PeopleInMemoryRepository) -> None:
     person = Person(id="1", location=Location(x=0, y=0))
     people.create_one(person)
 
@@ -32,12 +34,12 @@ def test_should_not_duplicate_on_create_one(people: PeopleInMemoryRepository):
         people.create_one(person)
 
 
-def test_should_not_read_when_does_not_exist(people: PeopleInMemoryRepository):
+def test_should_not_read_when_does_not_exist(people: PeopleInMemoryRepository) -> None:
     with pytest.raises(DoesNotExistError):
         people.read_one("1")
 
 
-def test_should_read_one(people: PeopleInMemoryRepository):
+def test_should_read_one(people: PeopleInMemoryRepository) -> None:
     person = Person(id="1", location=Location(x=0, y=0))
     people.create_one(person)
 
@@ -46,12 +48,14 @@ def test_should_read_one(people: PeopleInMemoryRepository):
     assert existing_person == person
 
 
-def test_should_not_delete_when_does_not_exist(people: PeopleInMemoryRepository):
+def test_should_not_delete_when_does_not_exist(
+    people: PeopleInMemoryRepository,
+) -> None:
     with pytest.raises(DoesNotExistError):
         people.delete_one("1")
 
 
-def test_should_delete_one(people: PeopleInMemoryRepository):
+def test_should_delete_one(people: PeopleInMemoryRepository) -> None:
     person = Person(id="1", location=Location(x=0, y=0))
     people.create_one(person)
 
@@ -60,12 +64,14 @@ def test_should_delete_one(people: PeopleInMemoryRepository):
     assert len(people.read_all()) == 0
 
 
-def test_should_not_update_when_does_not_exist(people: PeopleInMemoryRepository):
+def test_should_not_update_when_does_not_exist(
+    people: PeopleInMemoryRepository,
+) -> None:
     with pytest.raises(DoesNotExistError):
         people.update_one(Person(id="1", location=Location(x=0, y=0)))
 
 
-def test_should_update_one(people: PeopleInMemoryRepository):
+def test_should_update_one(people: PeopleInMemoryRepository) -> None:
     _person = Person(id="1", location=Location(x=0, y=0))
     people.create_one(_person)
     person = Person(id="1", location=Location(x=1, y=1))
