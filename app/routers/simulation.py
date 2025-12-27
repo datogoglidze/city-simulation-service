@@ -16,7 +16,6 @@ async def websocket_endpoint(
     simulation: SimulationServiceDependable,
 ) -> None:
     await websocket_manager.connect(websocket)
-    await simulation.broadcast_state()
 
     try:
         while True:
