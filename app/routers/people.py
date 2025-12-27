@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from starlette import status
 
 from app.config import config
-from app.models.errors import DoesNotExistError, ExistsError
+from app.models.errors import DoesNotExistError
 from app.models.person import Location, Person
 from app.runner.dependencies import PeopleServiceDependable
 
@@ -77,12 +77,7 @@ def create_one(person: PersonCreate, people: PeopleServiceDependable) -> PersonR
         )
     )
 
-    try:
-        created = people.create_one(_person)
-    except ExistsError as e:
-        raise HTTPException(
-            status_code=409, detail=f"Person with id {e.id} already exists"
-        )
+    created = people.create_one(_person)
 
     return PersonRead(
         id=created.id,
