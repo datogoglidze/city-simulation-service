@@ -1,8 +1,10 @@
-from dataclasses import dataclass, field
+import json
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Iterator
 
 from app.models.errors import DoesNotExistError, ExistsError
-from app.models.person import Person
+from app.models.person import Location, Person
 
 
 @dataclass
@@ -47,3 +49,26 @@ class PeopleInMemoryRepository:
             raise DoesNotExistError(person.id)
 
         self._people[person.id] = person
+
+
+@dataclass
+class PeopleSnapshotJsonRepository:
+    snapshot_file: Path
+
+    def __post_init__(self) -> None:
+        self.snapshot_file.parent.mkdir(exist_ok=True)
+
+    def save(self, people: list[Person]) -> None:
+        raw = [asdict(p) for p in people]
+        self.snapshot_file.write_text(json.dumps(raw, indent=2))
+
+    def load(self) -> list[Person] | None:
+        if not self.snapshot_file.exists():
+            return None
+
+        raw = json.loads(self.snapshot_file.read_text())
+
+        return [
+            Person(id=person["id"], location=Location(**person["location"]))
+            for person in raw
+        ]
