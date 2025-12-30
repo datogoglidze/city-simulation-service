@@ -13,7 +13,7 @@ class PeopleSnapshotJsonRepository:
         self.snapshot_file.parent.mkdir(exist_ok=True)
 
     def save(self, people: list[Person]) -> None:
-        raw = [asdict(p) for p in people]
+        raw = [asdict(person) for person in people]
         self.snapshot_file.write_text(json.dumps(raw, indent=2))
 
     def load(self) -> list[Person] | None:
