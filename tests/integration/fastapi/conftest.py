@@ -5,7 +5,6 @@ from starlette.testclient import TestClient
 
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
-from app.runner.config import config
 from app.runner.fastapi import FastApiConfig
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
@@ -15,14 +14,14 @@ from app.services.simulation import SimulationService
 @pytest.fixture
 def client() -> TestClient:
     websocket_manager = WebSocketManager()
+
     snapshot_repository = PeopleSnapshotJsonRepository(
-        snapshot_file=Path(config.SNAPSHOT_PATH)
+        snapshot_file=Path("test_people_snapshot.json")
     )
+
     people_service = PeopleService(
         people=PeopleInMemoryRepository(),
-        snapshot=snapshot_repository,
         grid_size=10,
-        people_amount=0,
     )
 
     return TestClient(
