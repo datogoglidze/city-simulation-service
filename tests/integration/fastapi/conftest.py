@@ -3,8 +3,10 @@ from pathlib import Path
 import pytest
 from starlette.testclient import TestClient
 
-from app.repositories.people import PeopleInMemoryRepository
-from app.repositories.people_snapshot import SnapshotJsonRepository
+from app.repositories.people import (
+    PeopleInMemoryRepository,
+    PeopleSnapshotJsonRepository,
+)
 from app.runner.config import config
 from app.runner.fastapi import FastApiConfig
 from app.runner.websocket import WebSocketManager
@@ -15,7 +17,7 @@ from app.services.simulation import SimulationService
 @pytest.fixture
 def client() -> TestClient:
     websocket_manager = WebSocketManager()
-    snapshot_repository = SnapshotJsonRepository(
+    snapshot_repository = PeopleSnapshotJsonRepository(
         snapshot_file=Path(config.SNAPSHOT_PATH)
     )
     people_service = PeopleService(

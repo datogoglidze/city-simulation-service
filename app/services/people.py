@@ -4,14 +4,16 @@ from dataclasses import dataclass
 
 from app.models.errors import DoesNotExistError
 from app.models.person import Location, Person
-from app.repositories.people import PeopleInMemoryRepository
-from app.repositories.people_snapshot import SnapshotJsonRepository
+from app.repositories.people import (
+    PeopleInMemoryRepository,
+    PeopleSnapshotJsonRepository,
+)
 
 
 @dataclass
 class PeopleService:
     people: PeopleInMemoryRepository
-    snapshot: SnapshotJsonRepository
+    snapshot: PeopleSnapshotJsonRepository
     grid_size: int
     people_amount: int
 
