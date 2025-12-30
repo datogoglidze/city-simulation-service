@@ -2,7 +2,7 @@ import pytest
 
 from app.models.errors import DoesNotExistError, ExistsError
 from app.models.person import Location, Person
-from app.repositories.people import PeopleInMemoryRepository
+from app.repositories.in_memory.people import PeopleInMemoryRepository
 
 
 @pytest.fixture

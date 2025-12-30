@@ -3,10 +3,8 @@ from pathlib import Path
 import uvicorn
 from typer import Typer
 
-from app.repositories.people import (
-    PeopleInMemoryRepository,
-    PeopleSnapshotJsonRepository,
-)
+from app.repositories.in_memory.people import PeopleInMemoryRepository
+from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
 from app.runner.config import config
 from app.runner.fastapi import FastApiConfig
 from app.runner.websocket import WebSocketManager
