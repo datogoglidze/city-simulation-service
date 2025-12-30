@@ -1,27 +1,12 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
 from starlette import status
 
 from app.models.errors import DoesNotExistError
 from app.models.person import Location, Person
 from app.routers.dependables import PeopleServiceDependable
-from app.runner.config import config
+from app.routers.schemas.person import PersonCreate, PersonLocation, PersonRead
 
 router = APIRouter(prefix="/people", tags=["People"])
-
-
-class PersonLocation(BaseModel):
-    x: int = Field(ge=0, lt=config.GRID_SIZE)
-    y: int = Field(ge=0, lt=config.GRID_SIZE)
-
-
-class PersonCreate(BaseModel):
-    location: PersonLocation
-
-
-class PersonRead(BaseModel):
-    id: str
-    location: PersonLocation
 
 
 @router.get(
