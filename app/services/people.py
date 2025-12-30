@@ -18,12 +18,11 @@ class PeopleService:
     def __post_init__(self) -> None:
         snapshot = self.snapshot.load()
 
-        if not snapshot:
+        if snapshot:
+            for person in snapshot:
+                self.people.create_one(person)
+        else:
             self.create_random(count=self.people_amount)
-            return
-
-        for person in snapshot:
-            self.people.create_one(person)
 
     def _random_person(self) -> Person:
         return Person(
