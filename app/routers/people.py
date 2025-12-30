@@ -4,8 +4,8 @@ from starlette import status
 
 from app.models.errors import DoesNotExistError
 from app.models.person import Location, Person
+from app.routers.dependables import PeopleServiceDependable
 from app.runner.config import config
-from app.runner.dependencies import PeopleServiceDependable
 
 router = APIRouter(prefix="/people", tags=["People"])
 
