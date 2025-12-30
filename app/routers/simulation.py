@@ -1,7 +1,7 @@
 from fastapi import APIRouter, WebSocket
 from fastapi.websockets import WebSocketDisconnect
 
-from app.runner.dependencies import WebSocketManagerDependable
+from app.routers.dependables import WebSocketManagerDependable
 
 router = APIRouter(prefix="/simulation", tags=["Simulation"])
 
