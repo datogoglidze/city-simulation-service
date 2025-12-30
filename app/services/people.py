@@ -4,10 +4,8 @@ from dataclasses import dataclass
 
 from app.models.errors import DoesNotExistError
 from app.models.person import Location, Person
-from app.repositories.people import (
-    PeopleInMemoryRepository,
-    PeopleSnapshotJsonRepository,
-)
+from app.repositories.in_memory.people import PeopleInMemoryRepository
+from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
 
 
 @dataclass

@@ -1,7 +1,7 @@
 import asyncio
 from dataclasses import asdict, dataclass
 
-from app.repositories.people import PeopleSnapshotJsonRepository
+from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
 
