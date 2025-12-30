@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from starlette import status
 
-from app.config import config
 from app.models.errors import DoesNotExistError
 from app.models.person import Location, Person
+from app.runner.config import config
 from app.runner.dependencies import PeopleServiceDependable
 
 router = APIRouter(prefix="/people", tags=["People"])

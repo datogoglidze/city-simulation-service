@@ -3,9 +3,9 @@ from pathlib import Path
 import uvicorn
 from typer import Typer
 
-from app.config import config
 from app.repositories.people import PeopleInMemoryRepository
 from app.repositories.people_snapshot import SnapshotJsonRepository
+from app.runner.config import config
 from app.runner.fastapi import FastApiConfig
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
