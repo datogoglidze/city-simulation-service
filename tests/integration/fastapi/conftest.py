@@ -9,6 +9,7 @@ from app.runner.fastapi import FastApiConfig
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
+from app.services.snapshot import SnapshotService
 
 
 @pytest.fixture
@@ -29,9 +30,14 @@ def client() -> TestClient:
             websocket=websocket_manager,
             simulation=SimulationService(
                 websocket_manager=websocket_manager,
-                snapshot=snapshot_repository,
                 people=people_service,
-                snapshot_interval=100,
+            ),
+            snapshot_service=(
+                SnapshotService(
+                    snapshot_repository=snapshot_repository,
+                    people_service=people_service,
+                    interval_seconds=100,
+                )
             ),
             people=people_service,
         ).setup()

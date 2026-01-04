@@ -32,6 +32,7 @@ class PeopleService:
                 self.people.update_one(updated_person)
 
     def _random_neighboring_location(self, person: Person) -> Location:
+        # TODO: Person must not stay at the same location
         x = (person.location.x + random.choice([-1, 0, 1])) % self.grid_size
         y = (person.location.y + random.choice([-1, 0, 1])) % self.grid_size
 

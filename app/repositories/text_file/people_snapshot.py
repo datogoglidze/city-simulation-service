@@ -14,11 +14,12 @@ class PeopleSnapshotJsonRepository:
 
     def save(self, people: list[Person]) -> None:
         raw = [asdict(person) for person in people]
+
         self.snapshot_file.write_text(json.dumps(raw, indent=2))
 
-    def load(self) -> list[Person] | None:
+    def load(self) -> list[Person]:
         if not self.snapshot_file.exists():
-            return None
+            raise FileNotFoundError(f"Snapshot file not found at {self.snapshot_file}")
 
         raw = json.loads(self.snapshot_file.read_text())
 

@@ -12,6 +12,7 @@ from app.runner.fastapi import FastApiConfig
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
+from app.services.snapshot import SnapshotService
 
 cli = Typer(no_args_is_help=True, add_completion=False)
 
@@ -29,17 +30,25 @@ def run(host: str = "0.0.0.0", port: int = 8000, root_path: str = "") -> None:
         grid_size=config.GRID_SIZE,
     )
 
-    initialize_people(people=people_service, snapshot=snapshot_repository)
+    snapshot_service = SnapshotService(
+        snapshot_repository=snapshot_repository,
+        people_service=people_service,
+        interval_seconds=config.SNAPSHOT_INTERVAL,
+    )
+
+    try:
+        snapshot_service.load_people()
+    except FileNotFoundError:
+        initialize_people(people_service)
 
     uvicorn.run(
         app=FastApiConfig(
             websocket=websocket_manager,
             simulation=SimulationService(
                 websocket_manager=websocket_manager,
-                snapshot=snapshot_repository,
                 people=people_service,
-                snapshot_interval=config.SNAPSHOT_INTERVAL,
             ),
+            snapshot_service=snapshot_service,
             people=people_service,
         ).setup(),
         host=host,
@@ -48,22 +57,16 @@ def run(host: str = "0.0.0.0", port: int = 8000, root_path: str = "") -> None:
     )
 
 
-def initialize_people(
-    people: PeopleService,
-    snapshot: PeopleSnapshotJsonRepository,
-) -> None:
-    initial_people = snapshot.load()
-
-    if not initial_people:
-        initial_people = [
-            Person(
-                location=Location(
-                    x=random.randint(0, config.GRID_SIZE - 1),
-                    y=random.randint(0, config.GRID_SIZE - 1),
-                )
+def initialize_people(people: PeopleService) -> None:
+    random_people = [
+        Person(
+            location=Location(
+                x=random.randint(0, config.GRID_SIZE - 1),
+                y=random.randint(0, config.GRID_SIZE - 1),
             )
-            for _ in range(config.PEOPLE_AMOUNT)
-        ]
+        )
+        for _ in range(config.PEOPLE_AMOUNT)
+    ]
 
-    for person in initial_people:
+    for person in random_people:
         people.create_one(person)
