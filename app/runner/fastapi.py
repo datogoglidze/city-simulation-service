@@ -1,5 +1,5 @@
 import asyncio
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass
 from pathlib import Path
 from typing import AsyncGenerator
@@ -12,22 +12,33 @@ from app.routers import people, simulation
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
+from app.services.snapshot import SnapshotService
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     echo("Simulation starting...")
+
     simulation_task = asyncio.create_task(app.state.simulation.run())
+    snapshot_task = asyncio.create_task(app.state.snapshot_service.run_periodic_save())
+
     yield
 
     echo("Simulation stopping...")
     simulation_task.cancel()
+    snapshot_task.cancel()
+
+    with suppress(asyncio.CancelledError):
+        await simulation_task
+    with suppress(asyncio.CancelledError):
+        await snapshot_task
 
 
 @dataclass
 class FastApiConfig:
     websocket: WebSocketManager
     simulation: SimulationService
+    snapshot_service: SnapshotService
     people: PeopleService
 
     title: str = "City Simulator"
@@ -44,6 +55,7 @@ class FastApiConfig:
 
         app.state.websocket = self.websocket
         app.state.simulation = self.simulation
+        app.state.snapshot_service = self.snapshot_service
         app.state.people = self.people
 
         app.include_router(simulation.router)
