@@ -35,11 +35,11 @@ def test_should_save(
 def test_should_load(
     snapshot: PeopleSnapshotJsonRepository,
 ) -> None:
-    snapshot.save([Person(id="1", location=Location(x=0, y=0))])
+    person = Person(id="1", location=Location(x=0, y=0))
+    snapshot.save([person])
 
     people = snapshot.load()
 
-    assert len(people) == 1
-    assert people == [Person(id="1", location=Location(x=0, y=0))]
+    assert people == [person]
 
     snapshot.snapshot_file.unlink()
