@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +26,7 @@
             background: white;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 900px;
             width: 100%;
         }
@@ -73,8 +74,13 @@
             width: 100%;
             padding-top: 100%;
             background: #f0f0f0;
+            background-image:
+                linear-gradient(#ccc 1px, transparent 1px),
+                linear-gradient(90deg, #ccc 1px, transparent 1px);
+            background-size: 1% 1%;
+            /* 100x100 grid */
             border: 3px solid #333;
-            border-radius: 10px;
+            border-radius: 4px;
             overflow: hidden;
         }
 
@@ -88,20 +94,18 @@
 
         .person {
             position: absolute;
-            width: 8px;
-            height: 8px;
             background: #ff6b6b;
-            border-radius: 50%;
-            border: 2px solid #c92a2a;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border-radius: 1px;
+            /* border: 1px solid #c92a2a; */
+            transition: all 0.2s ease;
+            /* box-shadow: 0 1px 2px rgba(0,0,0,0.2); */
         }
 
         .person:hover {
-            transform: scale(1.5);
+            transform: scale(2);
             z-index: 10;
             background: #ffd700;
-            border-color: #ffa500;
+            /* border-color: #ffa500; */
         }
 
         .stats {
@@ -117,7 +121,7 @@
             padding: 20px;
             border-radius: 10px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .stat-value {
@@ -146,12 +150,12 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
         }
 
         button:active {
@@ -169,8 +173,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         .connecting .status {
@@ -178,10 +189,11 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>🏙️ City Simulator</h1>
-        <p class="subtitle">Watch people randomly move across a 100x100 grid</p>
+        <p class="subtitle">Loading grid configuration...</p>
 
         <div id="status" class="status disconnected">Disconnected</div>
 
@@ -206,7 +218,8 @@
 
         <div class="controls">
             <button id="connect-btn" class="btn-connect" onclick="connect()">Connect</button>
-            <button id="disconnect-btn" class="btn-disconnect" onclick="disconnect()" style="display:none;">Disconnect</button>
+            <button id="disconnect-btn" class="btn-disconnect" onclick="disconnect()"
+                style="display:none;">Disconnect</button>
         </div>
     </div>
 
@@ -215,12 +228,45 @@
         let updateCount = 0;
         let lastUpdateTime = Date.now();
         let fpsCounter = 0;
+        let gridSize = 100; // Default
 
         // Update FPS counter every second
         setInterval(() => {
             document.getElementById('fps').textContent = fpsCounter;
             fpsCounter = 0;
         }, 1000);
+
+        async function fetchConfig() {
+            try {
+                const response = await fetch('/simulation/config');
+                const data = await response.json();
+                gridSize = data.grid_size;
+                console.log(`✅ Loaded config: Grid Size = ${gridSize}`);
+
+                // Update CSS dynamically
+                const percentage = 100 / gridSize;
+                const gridContainer = document.querySelector('.grid-container');
+                gridContainer.style.backgroundSize = `${percentage}% ${percentage}%`;
+
+                // Update subtitle
+                document.querySelector('.subtitle').textContent = `Watch people randomly move across a ${gridSize}x${gridSize} grid`;
+
+                // We'll update person styles in updateGrid via inline styles or CSS rule injection
+                // Usually easier to use inline styles for width/height in JS loop OR inject a style tag
+                // Let's inject a style tag for .person width/height
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .person {
+                        width: ${percentage}%;
+                        height: ${percentage}%;
+                    }
+                `;
+                document.head.appendChild(style);
+
+            } catch (error) {
+                console.error('❌ Failed to fetch config:', error);
+            }
+        }
 
         function connect() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -303,9 +349,10 @@
                     delete existingPeople[person.id];
                 }
 
-                // Update position (convert 0-99 to percentage)
-                personEl.style.left = `${person.location.x}%`;
-                personEl.style.top = `${person.location.y}%`;
+                // Update position dynamically based on grid size
+                const percentage = (100 / gridSize);
+                personEl.style.left = `${person.location.x * percentage}%`;
+                personEl.style.top = `${person.location.y * percentage}%`;
                 personEl.title = `Person ${person.id} (${person.location.x}, ${person.location.y})`;
             });
 
@@ -314,11 +361,12 @@
         }
 
         // Auto-connect on page load
-        window.addEventListener('load', () => {
-            console.log('🚀 Page loaded, auto-connecting...');
+        window.addEventListener('load', async () => {
+            console.log('🚀 Page loaded, fetching config and connecting...');
+            await fetchConfig();
             connect();
         });
     </script>
 </body>
-</html>
 
+</html>
