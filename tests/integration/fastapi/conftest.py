@@ -5,7 +5,7 @@ from starlette.testclient import TestClient
 
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
-from app.runner.fastapi import FastApiConfig
+from app.runner.fastapi import create_app
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
@@ -26,9 +26,9 @@ def client() -> TestClient:
     )
 
     return TestClient(
-        app=FastApiConfig(
+        app=create_app(
             websocket=websocket_manager,
-            simulation=SimulationService(
+            simulation_service=SimulationService(
                 websocket_manager=websocket_manager,
                 people=people_service,
             ),
@@ -39,6 +39,6 @@ def client() -> TestClient:
                     interval_seconds=100,
                 )
             ),
-            people=people_service,
-        ).setup()
+            people_service=people_service,
+        )
     )
