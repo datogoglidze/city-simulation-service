@@ -61,8 +61,8 @@ def initialize_people(people: PeopleService) -> None:
     random_people = [
         Person(
             location=Location(
-                x=random.randint(0, config.GRID_SIZE - 1),
-                y=random.randint(0, config.GRID_SIZE - 1),
+                q=random.randint(0, config.GRID_SIZE - 1),
+                r=random.randint(0, config.GRID_SIZE - 1),
             )
         )
         for _ in range(config.PEOPLE_AMOUNT)

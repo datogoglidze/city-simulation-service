@@ -74,11 +74,7 @@
             width: 100%;
             padding-top: 100%;
             background: #f0f0f0;
-            background-image:
-                linear-gradient(#ccc 1px, transparent 1px),
-                linear-gradient(90deg, #ccc 1px, transparent 1px);
-            background-size: 1% 1%;
-            /* 100x100 grid */
+            /* Background handled by JS for perfect Hex grid */
             border: 3px solid #333;
             border-radius: 4px;
             overflow: hidden;
@@ -95,8 +91,8 @@
         .person {
             position: absolute;
             background: #ff6b6b;
-            border-radius: 1px;
-            /* border: 1px solid #c92a2a; */
+            /* Hexagon shape */
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
             transition: all 0.2s ease;
             /* box-shadow: 0 1px 2px rgba(0,0,0,0.2); */
         }
@@ -230,6 +226,10 @@
         let fpsCounter = 0;
         let gridSize = 100; // Default
 
+        // Geometry constants for Pointy-topped Hexagons
+        // We define them relative to a unit size, then scale to percentages
+        const SQRT3 = Math.sqrt(3);
+
         // Update FPS counter every second
         setInterval(() => {
             document.getElementById('fps').textContent = fpsCounter;
@@ -243,22 +243,129 @@
                 gridSize = data.grid_size;
                 console.log(`✅ Loaded config: Grid Size = ${gridSize}`);
 
-                // Update CSS dynamically
-                const percentage = 100 / gridSize;
-                const gridContainer = document.querySelector('.grid-container');
-                gridContainer.style.backgroundSize = `${percentage}% ${percentage}%`;
-
                 // Update subtitle
-                document.querySelector('.subtitle').textContent = `Watch people randomly move across a ${gridSize}x${gridSize} grid`;
+                document.querySelector('.subtitle').textContent = `Watch people move in a ${gridSize}x${gridSize} Hex Grid`;
 
-                // We'll update person styles in updateGrid via inline styles or CSS rule injection
-                // Usually easier to use inline styles for width/height in JS loop OR inject a style tag
-                // Let's inject a style tag for .person width/height
+                // Calculate dimensions
+                // For a grid of Width x Height (gridSize x gridSize):
+                // Total Width = gridSize * HexWidth + 0.5 * HexWidth (for offset rows)
+                // Total Height = gridSize * (3/4 * HexHeight) + (1/4 * HexHeight)
+                // We want to fit this into 100% x 100% container.
+
+                // Let's assume standard "Radius" R.
+                // HexWidth = sqrt(3) * R
+                // HexHeight = 2 * R
+                // ColWidth = HexWidth
+                // RowHeight = 1.5 * R (3/4 of height)
+
+                // We solve for R such that the grid fits.
+                // It's easier to think in "Hex Units" and then convert to %.
+
+                const hexWidthUnit = SQRT3;
+                const hexHeightUnit = 2;
+                const rowHeightUnit = 1.5;
+
+                // Max width needed: (gridSize + 0.5) * hexWidthUnit
+                const totalWidthUnits = (gridSize + 0.5) * hexWidthUnit;
+                // Max height needed: (gridSize * rowHeightUnit) + (0.25 * hexHeightUnit)
+                const totalHeightUnits = (gridSize * rowHeightUnit) + 0.5;
+
+                // Scaling factor to percentage (using the larger dimension to fit containment)
+                // Actually we stretch to fill 100% so we calculate % width and % height separately
+                // but usually we want to maintain aspect ratio?
+                // The current container has padding-top: 100% (1:1 aspect ratio).
+                // So we can just map units to % of container.
+
+                const unitToPercentX = 100 / totalWidthUnits;
+                const unitToPercentY = 100 / totalHeightUnits;
+
+                // Generate SVG Background
+                // We create a pattern containing 2 rows to handle the offset repetition comfortably?
+                // Or easier: generate the whole grid as SVG!
+                // Since gridSize is reasonable (~100), generating 10,000 polys in one SVG bg might be heavy but valid.
+                // BETTER: Generate a pattern tile.
+                // A repeating tile for hex grid is rectangular.
+                // Width: hexWidthUnit
+                // Height: 3 * R = 2 * rowHeightUnit
+
+                // To guarantee pixel perfection with the people (divs), it is safer to:
+                // 1. Calculate the exact % size of a hex.
+                // 2. Set the background image to a generated SVG.
+
+                // Let's generate a repeating Pattern SVG.
+                // Tile Width = HexWidth
+                // Tile Height = 3 * R
+                // This tile contains:
+                // 1 full hex at (0,0) (pointy top)?? No, tiling hexes is tricky.
+                // Standard rectangular tile for hex grid contains 2 hex centers.
+                // Center 1: (0, 0)
+                // Center 2: (Width/2, 1.5*R)
+
+                const R = 50; // Arbitrary unit for SVG path
+                const W = SQRT3 * R;
+                const H = 2 * R;
+                const tileW = W;
+                const tileH = 3 * R;
+
+                // SVG points for a pointy topped hex of radius R at cx, cy
+                function hexPoints(cx, cy, r) {
+                    const points = [];
+                    for (let i = 0; i < 6; i++) {
+                        const deg = 30 + 60 * i;
+                        const rad = Math.PI / 180 * deg;
+                        points.push(`${cx + r * Math.cos(rad)},${cy + r * Math.sin(rad)}`);
+                    }
+                    return points.join(' ');
+                }
+
+                // We draw parts of histograms to make a seamless tile.
+                // Or just a big SVG for the whole grid?
+                // Let's try a big SVG for the whole grid since gridSize is finite. It's accurate and easy.
+                let svgContent = `<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 ${totalWidthUnits} ${totalHeightUnits}' preserveAspectRatio='none'>`;
+                svgContent += `<defs><style>polygon { fill: none; stroke: #888; stroke-width: ${0.08 * totalWidthUnits / gridSize}; vector-effect: non-scaling-stroke; }</style></defs>`;
+
+                for (let y = 0; y < gridSize; y++) {
+                    for (let x = 0; x < gridSize; x++) {
+                        const xOffset = (y % 2 !== 0) ? (hexWidthUnit / 2) : 0;
+                        const cx = (x * hexWidthUnit) + xOffset + (hexWidthUnit / 2);
+                        const cy = (y * rowHeightUnit) + (hexHeightUnit / 2); // Radius is 1 in this scale logic (hexHeightUnit=2)
+
+                        // We use Radius = 1 (since hexHeightUnit = 2)
+                        // Actually we need to be careful with edge clipping
+                        // Just draw the hex relative to cx, cy with r=1
+                        // But wait, hexHeight is 2, so Radius is 1. Correct.
+                        const pts = hexPoints(cx, cy, 0.98); // 0.98 to leave gap
+                        svgContent += `<polygon points='${pts}' />`;
+                    }
+                }
+                svgContent += `</svg>`;
+
+                const svgUrl = `data:image/svg+xml;base64,${btoa(svgContent)}`;
+                document.querySelector('.grid-container').style.background = `url("${svgUrl}") no-repeat center/contain`;
+                document.querySelector('.grid-container').style.backgroundColor = '#f7f7f7';
+
+                // Save scaling logic for updateGrid
+                window.hexGridCalc = {
+                    unitToPercentX,
+                    unitToPercentY,
+                    hexWidthUnit,
+                    rowHeightUnit,
+                    hexHeightUnit
+                };
+
+                // Update Person Style
+                // Person width in % = HexWidth * unitToPercentX
+                // Person height in % = HexHeight * unitToPercentY
+                const pW = hexWidthUnit * unitToPercentX; // * 0.9 for gap
+                const pH = hexHeightUnit * unitToPercentY;
+
                 const style = document.createElement('style');
                 style.innerHTML = `
                     .person {
-                        width: ${percentage}%;
-                        height: ${percentage}%;
+                        width: ${pW * 0.8}%;
+                        height: ${pH * 0.8}%;
+                        margin-left: ${pW * 0.1}%; /* Center visually */
+                        margin-top: ${pH * 0.1}%;
                     }
                 `;
                 document.head.appendChild(style);
@@ -326,6 +433,9 @@
 
         function updateGrid(people) {
             const grid = document.getElementById('grid');
+            if (!window.hexGridCalc) return; // Not ready
+
+            const { unitToPercentX, unitToPercentY, hexWidthUnit, rowHeightUnit } = window.hexGridCalc;
 
             // Create a map of existing people elements
             const existingPeople = {};
@@ -342,18 +452,34 @@
                     personEl = document.createElement('div');
                     personEl.className = 'person';
                     personEl.dataset.id = person.id;
-                    personEl.title = `Person ${person.id} (${person.location.x}, ${person.location.y})`;
+                    personEl.title = `Person ${person.id} (${person.location.q}, ${person.location.r})`;
                     grid.appendChild(personEl);
                 } else {
                     // Remove from existing map (so we know it's still active)
                     delete existingPeople[person.id];
                 }
 
-                // Update position dynamically based on grid size
-                const percentage = (100 / gridSize);
-                personEl.style.left = `${person.location.x * percentage}%`;
-                personEl.style.top = `${person.location.y * percentage}%`;
-                personEl.title = `Person ${person.id} (${person.location.x}, ${person.location.y})`;
+                // Hexagonal Positioning (Odd-r) matching the SVG generation
+                // Backend is now native Axial (q, r).
+                // To visualize this on our Odd-r SVG grid without complex view transforms,
+                // we'll map q -> col (x), r -> row (y).
+                // This means 'r' axis is vertical, 'q' axis is horizontal.
+                // The visual result of Axial (0,1) movement will be a zig-zag descent on Odd-r grid,
+                // but random movement remains valid.
+
+                const col = person.location.q;
+                const row = person.location.r;
+
+                // Shift odd rows right by half a hex
+                const xOffset = (row % 2 !== 0) ? (hexWidthUnit / 2) : 0;
+
+                const leftUnit = (col * hexWidthUnit) + xOffset;
+                const topUnit = (row * rowHeightUnit);
+
+                personEl.style.left = `${leftUnit * unitToPercentX}%`;
+                personEl.style.top = `${topUnit * unitToPercentY}%`;
+
+                personEl.title = `Person ${person.id} (q:${col}, r:${row})`;
             });
 
             // Remove any people that no longer exist

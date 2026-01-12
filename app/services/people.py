@@ -32,12 +32,20 @@ class PeopleService:
                 self.people.update_one(updated_person)
 
     def _random_neighboring_location(self, person: Person) -> Location:
-        dx, dy = 0, 0
-        while dx == 0 and dy == 0:
-            dx = random.choice([-1, 0, 1])
-            dy = random.choice([-1, 0, 1])
+        # Axial Coordinates (q, r) directions
+        directions = [
+            (1, 0),
+            (1, -1),
+            (0, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, 1),
+        ]
 
-        x = (person.location.x + dx) % self.grid_size
-        y = (person.location.y + dy) % self.grid_size
+        dq, dr = random.choice(directions)
 
-        return Location(x=x, y=y)
+        # Simple wrapping
+        q = (person.location.q + dq) % self.grid_size
+        r = (person.location.r + dr) % self.grid_size
+
+        return Location(q=q, r=r)

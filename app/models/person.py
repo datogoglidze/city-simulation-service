@@ -4,8 +4,8 @@ from uuid import uuid4
 
 @dataclass
 class Location:
-    x: int
-    y: int
+    q: int
+    r: int
 
 
 @dataclass

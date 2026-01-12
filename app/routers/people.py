@@ -21,8 +21,8 @@ def read_all(people: PeopleServiceDependable) -> list[PersonRead]:
         PersonRead(
             id=person.id,
             location=PersonLocation(
-                x=person.location.x,
-                y=person.location.y,
+                q=person.location.q,
+                r=person.location.r,
             ),
         )
         for person in _people
@@ -43,8 +43,8 @@ def read_one(person_id: str, people: PeopleServiceDependable) -> PersonRead:
     return PersonRead(
         id=_person.id,
         location=PersonLocation(
-            x=_person.location.x,
-            y=_person.location.y,
+            q=_person.location.q,
+            r=_person.location.r,
         ),
     )
 
@@ -57,8 +57,8 @@ def read_one(person_id: str, people: PeopleServiceDependable) -> PersonRead:
 def create_one(person: PersonCreate, people: PeopleServiceDependable) -> PersonRead:
     _person = Person(
         location=Location(
-            x=person.location.x,
-            y=person.location.y,
+            q=person.location.q,
+            r=person.location.r,
         )
     )
 
@@ -67,8 +67,8 @@ def create_one(person: PersonCreate, people: PeopleServiceDependable) -> PersonR
     return PersonRead(
         id=created.id,
         location=PersonLocation(
-            x=created.location.x,
-            y=created.location.y,
+            q=created.location.q,
+            r=created.location.r,
         ),
     )
 

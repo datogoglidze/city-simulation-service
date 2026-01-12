@@ -46,7 +46,7 @@ def test_should_load(
     people_service: PeopleService,
     snapshot_service: SnapshotService,
 ) -> None:
-    person = Person(id="1", location=Location(x=0, y=0))
+    person = Person(id="1", location=Location(q=0, r=0))
     snapshot_repository.save([person])
 
     loaded = snapshot_service.load_people()
@@ -62,7 +62,7 @@ async def test_should_save_periodically(
     people_service: PeopleService,
     snapshot_service: SnapshotService,
 ) -> None:
-    person = Person(id="1", location=Location(x=0, y=0))
+    person = Person(id="1", location=Location(q=0, r=0))
     people_service.create_one(person)
     periodic_task = asyncio.create_task(snapshot_service.run_periodic_save())
 
