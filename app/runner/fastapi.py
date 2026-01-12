@@ -1,6 +1,5 @@
 import asyncio
 from contextlib import asynccontextmanager, suppress
-from dataclasses import dataclass
 from pathlib import Path
 from typing import AsyncGenerator
 
@@ -34,37 +33,29 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await snapshot_task
 
 
-@dataclass
-class FastApiConfig:
-    websocket: WebSocketManager
-    simulation: SimulationService
-    snapshot_service: SnapshotService
-    people: PeopleService
+def create_app(
+    websocket: WebSocketManager,
+    simulation_service: SimulationService,
+    snapshot_service: SnapshotService,
+    people_service: PeopleService,
+) -> FastAPI:
+    app = FastAPI(
+        title="City Simulator",
+        description="Simulates city behavior",
+        version="0.1.0",
+        lifespan=lifespan,
+    )
 
-    title: str = "City Simulator"
-    description: str = "Simulates city behavior"
-    version: str = "0.1.0"
+    app.state.websocket = websocket
+    app.state.simulation = simulation_service
+    app.state.snapshot_service = snapshot_service
+    app.state.people = people_service
 
-    def setup(self) -> FastAPI:
-        app = FastAPI(
-            title=self.title,
-            description=self.description,
-            version=self.version,
-            lifespan=lifespan,
-        )
+    app.include_router(simulation.router)
+    app.include_router(people.router)
 
-        app.state.websocket = self.websocket
-        app.state.simulation = self.simulation
-        app.state.snapshot_service = self.snapshot_service
-        app.state.people = self.people
+    static_dir = Path(__file__).parent.parent.parent / "static"
+    if static_dir.exists():
+        app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
 
-        app.include_router(simulation.router)
-        app.include_router(people.router)
-
-        static_dir = Path(__file__).parent.parent.parent / "static"
-        if static_dir.exists():
-            app.mount(
-                "/", StaticFiles(directory=str(static_dir), html=True), name="static"
-            )
-
-        return app
+    return app

@@ -8,7 +8,7 @@ from app.models.person import Location, Person
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
 from app.runner.config import config
-from app.runner.fastapi import FastApiConfig
+from app.runner.fastapi import create_app
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
@@ -42,15 +42,15 @@ def run(host: str = "0.0.0.0", port: int = 8000, root_path: str = "") -> None:
         initialize_people(people_service)
 
     uvicorn.run(
-        app=FastApiConfig(
+        app=create_app(
             websocket=websocket_manager,
-            simulation=SimulationService(
+            simulation_service=SimulationService(
                 websocket_manager=websocket_manager,
                 people=people_service,
             ),
             snapshot_service=snapshot_service,
-            people=people_service,
-        ).setup(),
+            people_service=people_service,
+        ),
         host=host,
         port=port,
         root_path=root_path,
