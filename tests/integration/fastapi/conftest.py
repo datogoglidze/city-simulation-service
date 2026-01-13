@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from starlette.testclient import TestClient
 
+from app.models.hex_coordinate import OddRStrategy
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
 from app.runner.fastapi import create_app
@@ -23,6 +24,7 @@ def client() -> TestClient:
     people_service = PeopleService(
         people=PeopleInMemoryRepository(),
         grid_size=10,
+        coordinate_strategy=OddRStrategy(),
     )
 
     return TestClient(

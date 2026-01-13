@@ -4,7 +4,7 @@ from pathlib import Path
 import uvicorn
 from typer import Typer
 
-from app.models.person import Location, Person
+from app.models.person import Person
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
 from app.runner.config import config
@@ -28,6 +28,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, root_path: str = "") -> None:
     people_service = PeopleService(
         people=PeopleInMemoryRepository(),
         grid_size=config.GRID_SIZE,
+        coordinate_strategy=config.get_coordinate_strategy(),
     )
 
     snapshot_service = SnapshotService(
@@ -58,13 +59,12 @@ def run(host: str = "0.0.0.0", port: int = 8000, root_path: str = "") -> None:
 
 
 def initialize_people(people: PeopleService) -> None:
+    valid_positions = people.coordinate_strategy.generate_valid_locations(
+        config.GRID_SIZE
+    )
+
     random_people = [
-        Person(
-            location=Location(
-                q=random.randint(0, config.GRID_SIZE - 1),
-                r=random.randint(0, config.GRID_SIZE - 1),
-            )
-        )
+        Person(location=random.choice(valid_positions))
         for _ in range(config.PEOPLE_AMOUNT)
     ]
 

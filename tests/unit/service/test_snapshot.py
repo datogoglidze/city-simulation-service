@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from app.models.hex_coordinate import OddRStrategy
 from app.models.person import Location, Person
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
@@ -22,6 +23,7 @@ def people_service() -> PeopleService:
     return PeopleService(
         people=PeopleInMemoryRepository(),
         grid_size=10,
+        coordinate_strategy=OddRStrategy(),
     )
 
 
