@@ -3,9 +3,9 @@ from contextlib import suppress
 from dataclasses import dataclass
 
 from app.models.errors import DoesNotExistError
-from app.models.hex_coordinate import HexCoordinateStrategy
 from app.models.person import Location, Person
 from app.repositories.in_memory.people import PeopleInMemoryRepository
+from app.services.hex_coordinate_strategies import HexCoordinateStrategy
 
 
 @dataclass

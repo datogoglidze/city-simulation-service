@@ -3,11 +3,11 @@ from pathlib import Path
 import pytest
 from starlette.testclient import TestClient
 
-from app.models.hex_coordinate import OddRStrategy
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
 from app.runner.fastapi import create_app
 from app.runner.websocket import WebSocketManager
+from app.services.hex_coordinate_strategies import OddRStrategy
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.snapshot import SnapshotService

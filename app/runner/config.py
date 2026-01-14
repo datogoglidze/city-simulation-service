@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from app.models.hex_coordinate import (
+from app.services.hex_coordinate_strategies import (
     AxialStrategy,
     EvenRStrategy,
     HexCoordinateStrategy,
