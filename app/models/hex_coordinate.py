@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 
 from app.models.person import Location
 
@@ -56,21 +55,3 @@ class AxialStrategy(HexCoordinateStrategy):
 
     def offset_to_axial(self, col: int, row: int) -> tuple[int, int]:
         return col, row
-
-
-@dataclass
-class HexCoordinateSystem:
-    strategy: HexCoordinateStrategy
-
-    def axial_to_offset(self, location: Location) -> tuple[int, int]:
-        return self.strategy.axial_to_offset(location.q, location.r)
-
-    def offset_to_axial(self, col: int, row: int) -> Location:
-        q, r = self.strategy.offset_to_axial(col, row)
-        return Location(q=q, r=r)
-
-    def is_within_bounds(self, location: Location, grid_size: int) -> bool:
-        return self.strategy.is_within_grid_bounds(location.q, location.r, grid_size)
-
-    def generate_valid_locations(self, grid_size: int) -> list[Location]:
-        return self.strategy.generate_valid_locations(grid_size)

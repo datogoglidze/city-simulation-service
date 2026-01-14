@@ -6,7 +6,6 @@ from app.models.hex_coordinate import (
     AxialStrategy,
     EvenRStrategy,
     HexCoordinateStrategy,
-    HexCoordinateSystem,
     OddRStrategy,
 )
 
@@ -35,10 +34,6 @@ class Config:
                 f"Unknown hex coordinate system: {system}. "
                 "Use 'odd-r', 'even-r', or 'axial'"
             )
-
-    @staticmethod
-    def get_coordinate_system() -> HexCoordinateSystem:
-        return HexCoordinateSystem(strategy=Config.get_coordinate_strategy())
 
 
 config = Config()
