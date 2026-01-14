@@ -23,7 +23,7 @@ def client() -> TestClient:
 
     people_service = PeopleService(
         people=PeopleInMemoryRepository(),
-        movement_service=MovementService(grid_size=10),
+        movement=MovementService(grid_size=10),
     )
 
     return TestClient(

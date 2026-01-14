@@ -1,6 +1,6 @@
 import pytest
 
-from app.models.person import Location
+from app.models.person import Location, Person
 from app.services.movement import MovementService
 
 
@@ -10,19 +10,38 @@ def movement_service() -> MovementService:
 
 
 def test_should_move_to_adjacent_location(movement_service: MovementService) -> None:
-    location = Location(q=5, r=5)
+    person = Person(id="1", location=Location(q=5, r=5))
 
-    new_location = movement_service._calculate_next_location(location)
+    moved_person = movement_service.move_to_random_adjacent_location(
+        person=person, occupied_locations=set()
+    )
 
     assert (
-        abs(new_location.q - location.q) == 1 or abs(new_location.r - location.r) == 1
+        abs(moved_person.location.q - person.location.q) == 1
+        or abs(moved_person.location.r - person.location.r) == 1
     )
+
+
+def test_should_not_move_out_of_grid(
+    movement_service: MovementService,
+) -> None:
+    person = Person(id="1", location=Location(q=0, r=0))
+    occupied = {
+        Location(q=0, r=1),
+        Location(q=1, r=0),
+    }
+
+    moved_person = movement_service.move_to_random_adjacent_location(
+        person=person, occupied_locations=occupied
+    )
+
+    assert moved_person.location == person.location
 
 
 def test_should_stay_in_place_when_no_valid_moves(
     movement_service: MovementService,
 ) -> None:
-    location = Location(q=5, r=5)
+    person = Person(id="1", location=Location(q=5, r=5))
     occupied = {
         Location(q=6, r=5),
         Location(q=6, r=4),
@@ -31,8 +50,9 @@ def test_should_stay_in_place_when_no_valid_moves(
         Location(q=4, r=6),
         Location(q=5, r=6),
     }
-    movement_service.occupied_locations = occupied
 
-    new_location = movement_service._calculate_next_location(location)
+    moved_person = movement_service.move_to_random_adjacent_location(
+        person=person, occupied_locations=occupied
+    )
 
-    assert new_location == location
+    assert moved_person.location == person.location

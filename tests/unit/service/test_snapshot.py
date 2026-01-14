@@ -22,7 +22,7 @@ def snapshot_repository() -> PeopleSnapshotJsonRepository:
 def people_service() -> PeopleService:
     return PeopleService(
         people=PeopleInMemoryRepository(),
-        movement_service=MovementService(grid_size=10),
+        movement=MovementService(grid_size=10),
     )
 
 

@@ -10,7 +10,7 @@ from app.services.movement import MovementService
 @dataclass
 class PeopleService:
     people: PeopleInMemoryRepository
-    movement_service: MovementService
+    movement: MovementService
 
     def create_one(self, person: Person) -> Person:
         return self.people.create_one(person)
@@ -25,11 +25,15 @@ class PeopleService:
         self.people.delete_one(person_id)
 
     def update_locations(self) -> None:
-        self.movement_service.occupied_locations = {
-            person.location for person in self.people
-        }
+        occupied_locations = {person.location for person in self.people}
 
         for person in self.people:
-            moved_person = self.movement_service.move(person)
+            moved_person = self.movement.move_to_random_adjacent_location(
+                person, occupied_locations
+            )
             with suppress(DoesNotExistError):
                 self.people.update_one(moved_person)
+
+            if moved_person.location != person.location:
+                occupied_locations.discard(person.location)
+            occupied_locations.add(moved_person.location)

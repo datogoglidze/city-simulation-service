@@ -28,7 +28,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, root_path: str = "") -> None:
 
     people_service = PeopleService(
         people=PeopleInMemoryRepository(),
-        movement_service=MovementService(grid_size=config.GRID_SIZE),
+        movement=MovementService(grid_size=config.GRID_SIZE),
     )
 
     snapshot_service = SnapshotService(
