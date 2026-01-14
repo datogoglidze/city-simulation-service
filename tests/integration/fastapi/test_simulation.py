@@ -28,7 +28,7 @@ def test_should_broadcast_updated_locations(client: TestClient) -> None:
         first_data = websocket.receive_json()
         assert first_data == [{"id": ANY, "location": {"q": 0, "r": 0}}]
 
-        client.app.state.people.update_location()  # type: ignore
+        client.app.state.people.update_locations()  # type: ignore
 
         asyncio.run(client.app.state.simulation.broadcast_state())  # type: ignore
 

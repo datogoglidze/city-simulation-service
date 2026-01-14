@@ -10,6 +10,7 @@ from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonReposit
 from app.runner.config import config
 from app.runner.fastapi import create_app
 from app.runner.websocket import WebSocketManager
+from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.snapshot import SnapshotService
@@ -27,7 +28,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, root_path: str = "") -> None:
 
     people_service = PeopleService(
         people=PeopleInMemoryRepository(),
-        grid_size=config.GRID_SIZE,
+        movement=MovementService(grid_size=config.GRID_SIZE),
     )
 
     snapshot_service = SnapshotService(
@@ -58,15 +59,15 @@ def run(host: str = "0.0.0.0", port: int = 8000, root_path: str = "") -> None:
 
 
 def initialize_people(people: PeopleService) -> None:
-    random_people = [
-        Person(
-            location=Location(
-                q=random.randint(0, config.GRID_SIZE - 1),
-                r=random.randint(0, config.GRID_SIZE - 1),
-            )
-        )
-        for _ in range(config.PEOPLE_AMOUNT)
+    grid_size = config.GRID_SIZE
+    max_people = grid_size**2
+
+    if config.PEOPLE_AMOUNT > max_people:
+        raise ValueError(f"Too many people to initialize. max: {max_people}")
+
+    all_locations = [
+        Location(q=q, r=r) for q in range(grid_size) for r in range(grid_size)
     ]
 
-    for person in random_people:
-        people.create_one(person)
+    for location in random.sample(all_locations, config.PEOPLE_AMOUNT):
+        people.create_one(Person(location=location))

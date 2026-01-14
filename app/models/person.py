@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from uuid import uuid4
 
 
-@dataclass
+@dataclass(frozen=True)
 class Location:
     q: int
     r: int
