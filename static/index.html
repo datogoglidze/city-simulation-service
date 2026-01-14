@@ -85,14 +85,9 @@
         transition: all 0.2s ease;
       }
 
-      #hexmap-container svg path.has-person,
-      #hexmap-container svg polygon.has-person {
-        fill: #ff6b6b !important;
-      }
-
       #hexmap-container svg path.has-person:hover,
       #hexmap-container svg polygon.has-person:hover {
-        fill: #ffd700 !important;
+        filter: brightness(1.3);
         transform: scale(1.1);
       }
 
@@ -229,6 +224,7 @@
       let gridSize = 100;
       let hexmapInstance = null;
       let currentPeople = {};
+      let personColors = {}; // Cache colors per person ID
 
       // Update FPS counter every second
       setInterval(() => {
@@ -365,6 +361,24 @@
         }
       }
 
+      // Generate a consistent random color for a person ID
+      function getPersonColor(personId) {
+        if (!personColors[personId]) {
+          // Generate a vibrant color using the person ID as seed
+          const hash = personId.split("").reduce((acc, char) => {
+            return char.charCodeAt(0) + ((acc << 5) - acc);
+          }, 0);
+
+          // Generate HSL color with fixed saturation and lightness for vibrant colors
+          const hue = Math.abs(hash) % 360;
+          const saturation = 65 + (Math.abs(hash >> 8) % 25); // 65-90%
+          const lightness = 50 + (Math.abs(hash >> 16) % 15); // 50-65%
+
+          personColors[personId] = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+        return personColors[personId];
+      }
+
       function updateHexmap(people) {
         if (!hexmapInstance) return;
 
@@ -391,14 +405,20 @@
             if (locationMap[hexId]) {
               hexPath.classList.add("has-person");
               const peopleAtLocation = locationMap[hexId];
+
+              // Use the color of the first person at this location
+              const personColor = getPersonColor(peopleAtLocation[0].id);
+              hexPath.style.fill = personColor;
+
               hexGroup.setAttribute(
                 "title",
                 `${peopleAtLocation.length} person(s): ${peopleAtLocation
-                  .map((p) => `ID ${p.id}`)
+                  .map((p) => `ID ${p.id.substring(0, 8)}`)
                   .join(", ")}`
               );
             } else {
               hexPath.classList.remove("has-person");
+              hexPath.style.fill = "";
               hexGroup.removeAttribute("title");
             }
           }
