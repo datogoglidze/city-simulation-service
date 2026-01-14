@@ -6,7 +6,6 @@ import pytest
 from app.models.person import Location, Person
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
-from app.services.hex_coordinate_strategies import OddRStrategy
 from app.services.people import PeopleService
 from app.services.snapshot import SnapshotService
 
@@ -23,7 +22,6 @@ def people_service() -> PeopleService:
     return PeopleService(
         people=PeopleInMemoryRepository(),
         grid_size=10,
-        coordinate_strategy=OddRStrategy(),
     )
 
 

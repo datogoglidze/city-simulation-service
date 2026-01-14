@@ -5,14 +5,12 @@ from dataclasses import dataclass
 from app.models.errors import DoesNotExistError
 from app.models.person import Location, Person
 from app.repositories.in_memory.people import PeopleInMemoryRepository
-from app.services.hex_coordinate_strategies import HexCoordinateStrategy
 
 
 @dataclass
 class PeopleService:
     people: PeopleInMemoryRepository
     grid_size: int
-    coordinate_strategy: HexCoordinateStrategy
 
     def create_one(self, person: Person) -> Person:
         return self.people.create_one(person)
@@ -35,12 +33,12 @@ class PeopleService:
 
     def _random_neighboring_location(self, person: Person) -> Location:
         adjacent_directions = [
-            (+1, 0),  # E
-            (+1, -1),  # NE
-            (0, -1),  # NW
-            (-1, 0),  # W
-            (-1, +1),  # SW
-            (0, +1),  # SE
+            (1, 0),
+            (1, -1),
+            (0, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, 1),
         ]
 
         random.shuffle(adjacent_directions)
@@ -48,10 +46,7 @@ class PeopleService:
         for dq, dr in adjacent_directions:
             new_q = person.location.q + dq
             new_r = person.location.r + dr
-
-            if self.coordinate_strategy.is_within_grid_bounds(
-                new_q, new_r, self.grid_size
-            ):
+            if 0 <= new_q < self.grid_size and 0 <= new_r < self.grid_size:
                 return Location(q=new_q, r=new_r)
 
         return person.location
