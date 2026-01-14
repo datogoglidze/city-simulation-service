@@ -10,6 +10,7 @@ from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonReposit
 from app.runner.config import config
 from app.runner.fastapi import create_app
 from app.runner.websocket import WebSocketManager
+from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.snapshot import SnapshotService
@@ -27,7 +28,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, root_path: str = "") -> None:
 
     people_service = PeopleService(
         people=PeopleInMemoryRepository(),
-        grid_size=config.GRID_SIZE,
+        movement_service=MovementService(grid_size=config.GRID_SIZE),
     )
 
     snapshot_service = SnapshotService(

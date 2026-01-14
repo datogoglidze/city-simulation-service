@@ -6,6 +6,7 @@ import pytest
 from app.models.person import Location, Person
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
+from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.snapshot import SnapshotService
 
@@ -21,7 +22,7 @@ def snapshot_repository() -> PeopleSnapshotJsonRepository:
 def people_service() -> PeopleService:
     return PeopleService(
         people=PeopleInMemoryRepository(),
-        grid_size=10,
+        movement_service=MovementService(grid_size=10),
     )
 
 

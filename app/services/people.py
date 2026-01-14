@@ -1,16 +1,16 @@
-import random
 from contextlib import suppress
 from dataclasses import dataclass
 
 from app.models.errors import DoesNotExistError
-from app.models.person import Location, Person
+from app.models.person import Person
 from app.repositories.in_memory.people import PeopleInMemoryRepository
+from app.services.movement import MovementService
 
 
 @dataclass
 class PeopleService:
     people: PeopleInMemoryRepository
-    grid_size: int
+    movement_service: MovementService
 
     def create_one(self, person: Person) -> Person:
         return self.people.create_one(person)
@@ -25,28 +25,11 @@ class PeopleService:
         self.people.delete_one(person_id)
 
     def update_location(self) -> None:
+        self.movement_service.occupied_locations = {
+            person.location for person in self.people
+        }
+
         for person in self.people:
-            new_location = self._random_neighboring_location(person)
-            updated_person = Person(id=person.id, location=new_location)
+            moved_person = self.movement_service.move(person)
             with suppress(DoesNotExistError):
-                self.people.update_one(updated_person)
-
-    def _random_neighboring_location(self, person: Person) -> Location:
-        adjacent_directions = [
-            (1, 0),
-            (1, -1),
-            (0, -1),
-            (-1, 0),
-            (-1, 1),
-            (0, 1),
-        ]
-
-        random.shuffle(adjacent_directions)
-
-        for dq, dr in adjacent_directions:
-            new_q = person.location.q + dq
-            new_r = person.location.r + dr
-            if 0 <= new_q < self.grid_size and 0 <= new_r < self.grid_size:
-                return Location(q=new_q, r=new_r)
-
-        return person.location
+                self.people.update_one(moved_person)
