@@ -24,7 +24,7 @@ class PeopleService:
     def delete_one(self, person_id: str) -> None:
         self.people.delete_one(person_id)
 
-    def update_location(self) -> None:
+    def update_locations(self) -> None:
         self.movement_service.occupied_locations = {
             person.location for person in self.people
         }
