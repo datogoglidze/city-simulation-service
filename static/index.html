@@ -237,21 +237,21 @@
       }, 1000);
 
       function generateHexJSON(size) {
-        // Generate HexJSON format for a grid
         const hexes = {};
-        const layout = "odd-r"; // odd-r offset layout
-
+        const layout = "odd-r";
         for (let r = 0; r < size; r++) {
+          const row_parity = r & 1;
+          const offset = (r - row_parity) / 2;
           for (let q = 0; q < size; q++) {
+            const col = q + offset;
             const id = `hex_${q}_${r}`;
             hexes[id] = {
               n: `${q},${r}`,
-              q: q,
+              q: col,
               r: r,
             };
           }
         }
-
         return {
           layout: layout,
           hexes: hexes,
