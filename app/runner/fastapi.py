@@ -4,8 +4,9 @@ import asyncio
 from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Callable
 
+import uvicorn
 from click import echo
 from fastapi import APIRouter, FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -78,6 +79,49 @@ class CityApi:
         app.swagger_ui_parameters = {"docExpansion": None}
 
         return app
+
+
+@dataclass
+class UvicornServer:
+    host: str = "0.0.0.0"
+    port: int = 8000
+    path: str = ""
+
+    startup_handlers: list[Callable[[], None]] = field(default_factory=list)
+
+    def with_host(self, value: str) -> UvicornServer:
+        self.host = value
+
+        return self
+
+    def and_port(self, value: int | str) -> UvicornServer:
+        self.port = int(value)
+
+        return self
+
+    def on_path(self, value: str) -> UvicornServer:
+        self.path = value
+
+        return self
+
+    def before_run(self, execute: Callable[[], None]) -> UvicornServer:
+        self.startup_handlers.append(execute)
+
+        return self
+
+    def run(self, api: FastAPI) -> None:
+        self.on_startup()
+
+        uvicorn.run(
+            api,
+            host=self.host,
+            port=self.port,
+            root_path=self.path,
+        )
+
+    def on_startup(self) -> None:
+        for handler in self.startup_handlers:
+            handler()
 
 
 @asynccontextmanager
