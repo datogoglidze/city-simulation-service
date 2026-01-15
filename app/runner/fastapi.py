@@ -1,17 +1,83 @@
+from __future__ import annotations
+
 import asyncio
 from contextlib import asynccontextmanager, suppress
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import AsyncGenerator
 
 from click import echo
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.routers import people, simulation
 from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.snapshot import SnapshotService
+
+
+@dataclass
+class CityApi:
+    routes: list[APIRouter] = field(default_factory=list)
+    websocket: WebSocketManager = field(init=False)
+    simulation_service: SimulationService = field(init=False)
+    people_service: PeopleService = field(init=False)
+    snapshot_service: SnapshotService | None = None
+
+    def with_router(self, router: APIRouter) -> CityApi:
+        self.routes.append(router)
+
+        return self
+
+    def with_websocket_manager(self, websocket: WebSocketManager) -> CityApi:
+        self.websocket = websocket
+
+        return self
+
+    def with_simulation_service(self, simulation_service: SimulationService) -> CityApi:
+        self.simulation_service = simulation_service
+
+        return self
+
+    def with_people_service(self, people_service: PeopleService) -> CityApi:
+        self.people_service = people_service
+
+        return self
+
+    def with_snapshot_service(
+        self, snapshot_service: SnapshotService | None
+    ) -> CityApi:
+        self.snapshot_service = snapshot_service
+
+        return self
+
+    def build(self) -> FastAPI:
+        app = FastAPI(
+            title="City Simulator",
+            description="Simulates city behavior",
+            version="0.1.0",
+            lifespan=lifespan,
+        )
+
+        app.state.websocket = self.websocket
+        app.state.simulation = self.simulation_service
+        app.state.snapshot_service = self.snapshot_service
+        app.state.people = self.people_service
+
+        for router in self.routes:
+            app.include_router(router)
+
+        static_dir = Path(__file__).parent.parent.parent / "static"
+        if static_dir.exists():
+            app.mount(
+                "/",
+                StaticFiles(directory=str(static_dir), html=True),
+                name="static",
+            )
+
+        app.swagger_ui_parameters = {"docExpansion": None}
+
+        return app
 
 
 @asynccontextmanager
@@ -38,31 +104,3 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     if snapshot_task:
         with suppress(asyncio.CancelledError):
             await snapshot_task
-
-
-def create_app(
-    websocket: WebSocketManager,
-    simulation_service: SimulationService,
-    people_service: PeopleService,
-    snapshot_service: SnapshotService | None = None,
-) -> FastAPI:
-    app = FastAPI(
-        title="City Simulator",
-        description="Simulates city behavior",
-        version="0.1.0",
-        lifespan=lifespan,
-    )
-
-    app.state.websocket = websocket
-    app.state.simulation = simulation_service
-    app.state.snapshot_service = snapshot_service
-    app.state.people = people_service
-
-    app.include_router(simulation.router)
-    app.include_router(people.router)
-
-    static_dir = Path(__file__).parent.parent.parent / "static"
-    if static_dir.exists():
-        app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
-
-    return app
