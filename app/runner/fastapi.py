@@ -19,25 +19,32 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     echo("Simulation starting...")
 
     simulation_task = asyncio.create_task(app.state.simulation.run())
-    snapshot_task = asyncio.create_task(app.state.snapshot_service.run_periodic_save())
+
+    snapshot_task = None
+    if app.state.snapshot_service:
+        snapshot_task = asyncio.create_task(
+            app.state.snapshot_service.run_periodic_save()
+        )
 
     yield
 
     echo("Simulation stopping...")
     simulation_task.cancel()
-    snapshot_task.cancel()
+    if snapshot_task:
+        snapshot_task.cancel()
 
     with suppress(asyncio.CancelledError):
         await simulation_task
-    with suppress(asyncio.CancelledError):
-        await snapshot_task
+    if snapshot_task:
+        with suppress(asyncio.CancelledError):
+            await snapshot_task
 
 
 def create_app(
     websocket: WebSocketManager,
     simulation_service: SimulationService,
-    snapshot_service: SnapshotService,
     people_service: PeopleService,
+    snapshot_service: SnapshotService | None = None,
 ) -> FastAPI:
     app = FastAPI(
         title="City Simulator",
