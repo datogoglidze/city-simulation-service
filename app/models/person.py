@@ -8,7 +8,7 @@ class Location:
     r: int
 
 
-@dataclass
+@dataclass(frozen=True)
 class Person:
     location: Location
 
