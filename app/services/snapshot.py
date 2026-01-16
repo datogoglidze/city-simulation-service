@@ -1,28 +1,37 @@
 import asyncio
 from dataclasses import dataclass
 
-from app.models.person import Person
-from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
+from app.repositories.text_file.snapshot import SnapshotData, SnapshotJsonRepository
+from app.services.locations import LocationsService
 from app.services.people import PeopleService
 
 
 @dataclass
 class SnapshotService:
-    snapshot_repository: PeopleSnapshotJsonRepository
+    snapshot_repository: SnapshotJsonRepository
     people_service: PeopleService
+    locations_service: LocationsService
     interval_seconds: int
 
-    def load_people(self) -> list[Person]:
-        people = self.snapshot_repository.load()
+    def load_snapshot(self) -> SnapshotData:
+        """Load people and locations from snapshot."""
+        snapshot_data = self.snapshot_repository.load()
 
-        for person in people:
+        # First create all locations
+        for location in snapshot_data.locations:
+            self.locations_service.create_one(location)
+
+        # Then create all people (this will also add them to locations)
+        for person in snapshot_data.people:
             self.people_service.create_one(person)
 
-        return people
+        return snapshot_data
 
     async def run_periodic_save(self) -> None:
+        """Periodically save people and locations."""
         while True:
             await asyncio.sleep(self.interval_seconds)
             people = self.people_service.read_all()
+            locations = self.locations_service.read_all()
 
-            self.snapshot_repository.save(people)
+            self.snapshot_repository.save(people, locations)

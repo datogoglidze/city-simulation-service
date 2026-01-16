@@ -1,42 +1,31 @@
 import random
 from dataclasses import dataclass
 
-from app.models.person import Location, Person
+from app.models.person import Person
+from app.services.locations import LocationsService
 
 
 @dataclass
 class MovementService:
-    grid_size: int
+    locations_service: LocationsService
 
-    def move_to_random_adjacent_location(
-        self,
-        person: Person,
-        occupied_locations: set[Location],
-    ) -> Person:
-        adjacent_directions = [
-            (1, 0),  # East
-            (1, -1),  # Northeast
-            (0, -1),  # Northwestm
-            (-1, 0),  # West
-            (-1, 1),  # Southwest
-            (0, 1),  # Southeast
+    def move_to_random_adjacent_location(self, person: Person) -> Person:
+        """Move person to a random adjacent location if available."""
+        adjacent_location_ids = self.locations_service.get_adjacent_location_ids(
+            person.location_id
+        )
+
+        # Filter out occupied locations
+        available_location_ids = [
+            loc_id
+            for loc_id in adjacent_location_ids
+            if len(self.locations_service.read_one(loc_id).people_ids) == 0
         ]
 
-        random.shuffle(adjacent_directions)
+        if not available_location_ids:
+            return person
 
-        for dq, dr in adjacent_directions:
-            new_q = person.location.q + dq
-            new_r = person.location.r + dr
+        # Pick a random available location
+        new_location_id = random.choice(available_location_ids)
 
-            if not self._is_within_bounds(new_q, new_r):
-                continue
-
-            new_location = Location(q=new_q, r=new_r)
-
-            if new_location not in occupied_locations:
-                return Person(id=person.id, location=new_location)
-
-        return person
-
-    def _is_within_bounds(self, q: int, r: int) -> bool:
-        return 0 <= q < self.grid_size and 0 <= r < self.grid_size
+        return Person(id=person.id, location_id=new_location_id)

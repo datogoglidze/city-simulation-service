@@ -1,17 +1,10 @@
-from pydantic import BaseModel, Field
-
-from app.runner.config import config
-
-
-class PersonLocation(BaseModel):
-    q: int = Field(ge=0, lt=config.GRID_SIZE)
-    r: int = Field(ge=0, lt=config.GRID_SIZE)
+from pydantic import BaseModel
 
 
 class PersonCreate(BaseModel):
-    location: PersonLocation
+    location_id: str
 
 
 class PersonRead(BaseModel):
     id: str
-    location: PersonLocation
+    location_id: str

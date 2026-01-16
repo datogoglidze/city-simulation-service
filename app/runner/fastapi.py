@@ -12,6 +12,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.runner.websocket import WebSocketManager
+from app.services.locations import LocationsService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.snapshot import SnapshotService
@@ -23,6 +24,7 @@ class CityApi:
     websocket: WebSocketManager = field(init=False)
     simulation_service: SimulationService = field(init=False)
     people_service: PeopleService = field(init=False)
+    locations_service: LocationsService = field(init=False)
     snapshot_service: SnapshotService | None = None
 
     def with_router(self, router: APIRouter) -> CityApi:
@@ -45,6 +47,11 @@ class CityApi:
 
         return self
 
+    def with_locations_service(self, locations_service: LocationsService) -> CityApi:
+        self.locations_service = locations_service
+
+        return self
+
     def with_snapshot_service(
         self, snapshot_service: SnapshotService | None
     ) -> CityApi:
@@ -64,6 +71,7 @@ class CityApi:
         app.state.simulation = self.simulation_service
         app.state.snapshot_service = self.snapshot_service
         app.state.people = self.people_service
+        app.state.locations = self.locations_service
 
         for router in self.routes:
             app.include_router(router)

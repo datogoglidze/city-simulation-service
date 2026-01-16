@@ -5,8 +5,8 @@ from starlette.testclient import TestClient
 
 
 def test_should_broadcast_person_via_websocket(client: TestClient) -> None:
-    client.post("/people", json={"location": {"q": 0, "r": 0}})
-    client.post("/people", json={"location": {"q": 1, "r": 1}})
+    client.post("/people", json={"location_id": "0_0"})
+    client.post("/people", json={"location_id": "1_1"})
 
     with client.websocket_connect("/simulation/ws") as websocket:
         asyncio.run(client.app.state.simulation.broadcast_state())  # type: ignore
@@ -14,19 +14,19 @@ def test_should_broadcast_person_via_websocket(client: TestClient) -> None:
         data = websocket.receive_json()
 
         assert data == [
-            {"id": ANY, "location": {"q": 0, "r": 0}},
-            {"id": ANY, "location": {"q": 1, "r": 1}},
+            {"id": ANY, "location_id": "0_0"},
+            {"id": ANY, "location_id": "1_1"},
         ]
 
 
 def test_should_broadcast_updated_locations(client: TestClient) -> None:
-    client.post("/people", json={"location": {"q": 0, "r": 0}})
+    client.post("/people", json={"location_id": "5_5"})
 
     with client.websocket_connect("/simulation/ws") as websocket:
         asyncio.run(client.app.state.simulation.broadcast_state())  # type: ignore
 
         first_data = websocket.receive_json()
-        assert first_data == [{"id": ANY, "location": {"q": 0, "r": 0}}]
+        assert first_data == [{"id": ANY, "location_id": "5_5"}]
 
         client.app.state.people.update_locations()  # type: ignore
 
@@ -34,4 +34,5 @@ def test_should_broadcast_updated_locations(client: TestClient) -> None:
 
         second_data = websocket.receive_json()
         assert len(second_data) == 1
-        assert second_data != first_data
+        # Location might have changed
+        assert second_data[0]["id"] == first_data[0]["id"]

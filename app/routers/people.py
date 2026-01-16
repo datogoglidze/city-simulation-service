@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException
 from starlette import status
 
 from app.models.errors import DoesNotExistError
-from app.models.person import Location, Person
+from app.models.person import Person
 from app.routers.dependables import PeopleServiceDependable
-from app.routers.schemas.person import PersonCreate, PersonLocation, PersonRead
+from app.routers.schemas.person import PersonCreate, PersonRead
 
 router = APIRouter(prefix="/people", tags=["People"])
 
@@ -20,10 +20,7 @@ def read_all(people: PeopleServiceDependable) -> list[PersonRead]:
     return [
         PersonRead(
             id=person.id,
-            location=PersonLocation(
-                q=person.location.q,
-                r=person.location.r,
-            ),
+            location_id=person.location_id,
         )
         for person in _people
     ]
@@ -42,10 +39,7 @@ def read_one(person_id: str, people: PeopleServiceDependable) -> PersonRead:
 
     return PersonRead(
         id=_person.id,
-        location=PersonLocation(
-            q=_person.location.q,
-            r=_person.location.r,
-        ),
+        location_id=_person.location_id,
     )
 
 
@@ -55,21 +49,13 @@ def read_one(person_id: str, people: PeopleServiceDependable) -> PersonRead:
     response_model=PersonRead,
 )
 def create_one(person: PersonCreate, people: PeopleServiceDependable) -> PersonRead:
-    _person = Person(
-        location=Location(
-            q=person.location.q,
-            r=person.location.r,
-        )
-    )
+    _person = Person(location_id=person.location_id)
 
     created = people.create_one(_person)
 
     return PersonRead(
         id=created.id,
-        location=PersonLocation(
-            q=created.location.q,
-            r=created.location.r,
-        ),
+        location_id=created.location_id,
     )
 
 
