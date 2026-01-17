@@ -105,7 +105,7 @@ class CityInitializer:
         for q in range(self.grid_size):
             for r in range(self.grid_size):
                 location_id = str(uuid4())
-                location = Location(id=location_id, q=q, r=r, people_ids=tuple())
+                location = Location(id=location_id, q=q, r=r, people_ids=[])
                 self.locations_service.create_one(location)
                 all_location_ids.append(location_id)
 

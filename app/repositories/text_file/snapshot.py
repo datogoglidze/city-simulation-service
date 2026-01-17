@@ -42,7 +42,7 @@ class SnapshotJsonRepository:
                 id=loc["id"],
                 q=loc["q"],
                 r=loc["r"],
-                people_ids=tuple(loc.get("people_ids", [])),
+                people_ids=list(loc.get("people_ids", [])),
             )
             for loc in raw.get("locations", [])
         ]

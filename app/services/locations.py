@@ -26,16 +26,14 @@ class LocationsService:
             id=location.id,
             q=location.q,
             r=location.r,
-            people_ids=tuple([*location.people_ids, person_id]),
+            people_ids=[*location.people_ids, person_id],
         )
         self.locations.update_one(updated_location)
         return updated_location
 
     def remove_person_from_location(self, location_id: str, person_id: str) -> Location:
         location = self.locations.read_one(location_id)
-        updated_people_ids = tuple(
-            pid for pid in location.people_ids if pid != person_id
-        )
+        updated_people_ids = [pid for pid in location.people_ids if pid != person_id]
         updated_location = Location(
             id=location.id,
             q=location.q,

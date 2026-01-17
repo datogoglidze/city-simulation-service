@@ -22,7 +22,7 @@ def snapshot_repository() -> SnapshotJsonRepository:
 def locations_service() -> LocationsService:
     service = LocationsService(locations=LocationsInMemoryRepository())
     # Create a location for testing
-    location = Location(id="loc1", q=0, r=0, people_ids=tuple())
+    location = Location(id="loc1", q=0, r=0, people_ids=[])
     service.create_one(location)
     return service
 
@@ -71,7 +71,7 @@ def test_should_load(snapshot_repository: SnapshotJsonRepository) -> None:
     )
 
     person = Person(id="1", location_id="loc1")
-    location = Location(id="loc1", q=0, r=0, people_ids=("1",))
+    location = Location(id="loc1", q=0, r=0, people_ids=["1"])
     snapshot_repository.save([person], [location])
 
     loaded = fresh_snapshot_service.load_snapshot()

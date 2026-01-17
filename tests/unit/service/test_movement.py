@@ -12,7 +12,7 @@ def locations_service() -> LocationsService:
     # Create a 10x10 grid
     for q in range(10):
         for r in range(10):
-            location = Location(id=f"{q}_{r}", q=q, r=r, people_ids=tuple())
+            location = Location(id=f"{q}_{r}", q=q, r=r, people_ids=[])
             service.create_one(location)
     return service
 
@@ -49,7 +49,7 @@ def test_should_stay_in_place_when_no_valid_moves(
     adjacent_ids = locations_service.get_adjacent_location_ids("5_5")
     for loc_id in adjacent_ids:
         loc = locations_service.read_one(loc_id)
-        updated = Location(id=loc.id, q=loc.q, r=loc.r, people_ids=("other",))
+        updated = Location(id=loc.id, q=loc.q, r=loc.r, people_ids=["other"])
         locations_service.update_one(updated)
 
     moved_person = movement_service.move_to_random_adjacent_location(person=person)

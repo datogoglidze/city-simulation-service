@@ -21,7 +21,7 @@ def read_all(locations: LocationsServiceDependable) -> list[LocationRead]:
             id=location.id,
             q=location.q,
             r=location.r,
-            people_ids=list(location.people_ids),
+            people_ids=location.people_ids,
         )
         for location in _locations
     ]
@@ -44,5 +44,5 @@ def read_one(location_id: str, locations: LocationsServiceDependable) -> Locatio
         id=_location.id,
         q=_location.q,
         r=_location.r,
-        people_ids=list(_location.people_ids),
+        people_ids=_location.people_ids,
     )
