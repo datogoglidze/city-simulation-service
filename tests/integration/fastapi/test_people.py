@@ -84,6 +84,20 @@ def test_should_read_many(client: TestClient) -> None:
     ]
 
 
+def test_should_calculate_distance(client: TestClient) -> None:
+    location_1 = client.get("/locations").json()[0]
+    location_2 = client.get("/locations").json()[1]
+    person_1 = client.post("/people", json={"location_id": location_1["id"]}).json()
+    person_2 = client.post("/people", json={"location_id": location_2["id"]}).json()
+
+    response = client.get(
+        f"/people/distance?person_id_from={person_1['id']}&person_id_to={person_2['id']}"
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"distance": ANY}
+
+
 def test_should_not_delete_when_does_not_exist(client: TestClient) -> None:
     response = client.delete("/people/1")
 

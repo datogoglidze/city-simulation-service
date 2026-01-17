@@ -48,3 +48,15 @@ class LocationsService:
                 adjacent_ids.append(coord_to_id[(new_q, new_r)])
 
         return adjacent_ids
+
+    @staticmethod
+    def get_distance(from_q: int, from_r: int, to_q: int, to_r: int) -> int:
+        from_x = from_q
+        from_z = from_r
+        from_y = -from_x - from_z
+
+        to_x = to_q
+        to_z = to_r
+        to_y = -to_x - to_z
+
+        return (abs(from_x - to_x) + abs(from_y - to_y) + abs(from_z - to_z)) // 2

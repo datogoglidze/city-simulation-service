@@ -8,6 +8,7 @@ from app.routers.dependables import (
     MovementServiceDependable,
     PeopleServiceDependable,
 )
+from app.routers.schemas.distance import DistanceRead
 from app.routers.schemas.person import PersonCreate, PersonLocation, PersonRead
 
 router = APIRouter(prefix="/people", tags=["People"])
@@ -32,6 +33,35 @@ def read_all(people: PeopleServiceDependable) -> list[PersonRead]:
         )
         for person in _people
     ]
+
+
+@router.get(
+    "/distance",
+    status_code=status.HTTP_200_OK,
+    response_model=DistanceRead,
+)
+def get_distance(
+    person_id_from: str,
+    person_id_to: str,
+    people: PeopleServiceDependable,
+    locations: LocationsServiceDependable,
+) -> DistanceRead:
+    try:
+        person_from = people.read_one(person_id_from)
+        person_to = people.read_one(person_id_to)
+    except DoesNotExistError as e:
+        raise HTTPException(
+            status_code=404, detail=f"{e.resource} with id {e.id} not found"
+        )
+
+    distance = locations.get_distance(
+        from_q=person_from.location.q,
+        from_r=person_from.location.r,
+        to_q=person_to.location.q,
+        to_r=person_to.location.r,
+    )
+
+    return DistanceRead(distance=distance)
 
 
 @router.get(
