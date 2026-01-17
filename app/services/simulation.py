@@ -16,7 +16,7 @@ class SimulationService:
 
     async def broadcast_state(self) -> None:
         if self.websocket_manager.has_active_connections:
-            people_data = [
+            people = [
                 {
                     "id": person.id,
                     "location": {
@@ -28,7 +28,7 @@ class SimulationService:
                 for person in self.people.read_all()
             ]
 
-            await self.websocket_manager.broadcast(people_data)
+            await self.websocket_manager.broadcast(people)
 
     async def run(self) -> None:
         while True:
