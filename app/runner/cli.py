@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
-from uuid import uuid4
 
 from typer import Typer
 
@@ -29,10 +28,11 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
 
     locations_service = LocationsService(locations=LocationsInMemoryRepository())
 
-    people_service = PeopleService(
-        people=PeopleInMemoryRepository(),
-        movement=MovementService(locations_service=locations_service),
-        locations=locations_service,
+    people_service = PeopleService(people=PeopleInMemoryRepository())
+
+    movement_service = MovementService(
+        people_service=people_service,
+        locations_service=locations_service,
     )
 
     snapshot_service = SnapshotFactory.create(
@@ -48,6 +48,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         people_amount=config.PEOPLE_AMOUNT,
         people_service=people_service,
         locations_service=locations_service,
+        movement_service=movement_service,
     )
 
     (
@@ -66,6 +67,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
                 simulation_service=SimulationService(
                     websocket_manager=websocket_manager,
                     people=people_service,
+                    movement=movement_service,
                 )
             )
             .with_people_service(people_service)
@@ -83,6 +85,7 @@ class CityInitializer:
     people_amount: int
     people_service: PeopleService
     locations_service: LocationsService
+    movement_service: MovementService
 
     def initialize(self) -> None:
         if self.snapshot_service:
@@ -94,23 +97,20 @@ class CityInitializer:
             self._generate_city()
 
     def _generate_city(self) -> None:
-        """Generate all locations and randomly place people."""
         max_people = self.grid_size**2
 
         if self.people_amount > max_people:
             raise ValueError(f"Too many people to initialize. max: {max_people}")
 
-        # Create all locations
         all_location_ids = []
         for q in range(self.grid_size):
             for r in range(self.grid_size):
-                location_id = str(uuid4())
-                location = Location(id=location_id, q=q, r=r, people_ids=[])
+                location = Location(q=q, r=r, people_ids=[])
                 self.locations_service.create_one(location)
-                all_location_ids.append(location_id)
+                all_location_ids.append(location.id)
 
-        # Randomly assign people to locations
         selected_location_ids = random.sample(all_location_ids, self.people_amount)
         for location_id in selected_location_ids:
             person = Person(location_id=location_id)
             self.people_service.create_one(person)
+            self.movement_service.add_person_to_location(person)

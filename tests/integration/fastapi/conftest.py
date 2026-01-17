@@ -18,18 +18,17 @@ def client() -> TestClient:
     websocket_manager = WebSocketManager()
 
     locations_service = LocationsService(locations=LocationsInMemoryRepository())
+    people_service = PeopleService(people=PeopleInMemoryRepository())
+    movement_service = MovementService(
+        people_service=people_service,
+        locations_service=locations_service,
+    )
 
     # Create a 10x10 grid of locations for testing
     for q in range(10):
         for r in range(10):
             location = Location(id=f"{q}_{r}", q=q, r=r, people_ids=[])
             locations_service.create_one(location)
-
-    people_service = PeopleService(
-        people=PeopleInMemoryRepository(),
-        movement=MovementService(locations_service=locations_service),
-        locations=locations_service,
-    )
 
     return TestClient(
         app=CityApi()
@@ -41,9 +40,11 @@ def client() -> TestClient:
             simulation_service=SimulationService(
                 websocket_manager=websocket_manager,
                 people=people_service,
+                movement=movement_service,
             )
         )
         .with_people_service(people_service)
         .with_locations_service(locations_service)
+        .with_movement_service(movement_service)
         .build()
     )

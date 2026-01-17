@@ -28,11 +28,17 @@ def locations_service() -> LocationsService:
 
 
 @pytest.fixture
-def people_service(locations_service: LocationsService) -> PeopleService:
-    return PeopleService(
-        people=PeopleInMemoryRepository(),
-        movement=MovementService(locations_service=locations_service),
-        locations=locations_service,
+def people_service() -> PeopleService:
+    return PeopleService(people=PeopleInMemoryRepository())
+
+
+@pytest.fixture
+def movement_service(
+    people_service: PeopleService, locations_service: LocationsService
+) -> MovementService:
+    return MovementService(
+        people_service=people_service,
+        locations_service=locations_service,
     )
 
 
@@ -58,11 +64,7 @@ def test_should_raise_when_nothing_exist(snapshot_service: SnapshotService) -> N
 def test_should_load(snapshot_repository: SnapshotJsonRepository) -> None:
     # Create fresh services for this test to avoid conflicts
     fresh_locations_service = LocationsService(locations=LocationsInMemoryRepository())
-    fresh_people_service = PeopleService(
-        people=PeopleInMemoryRepository(),
-        movement=MovementService(locations_service=fresh_locations_service),
-        locations=fresh_locations_service,
-    )
+    fresh_people_service = PeopleService(people=PeopleInMemoryRepository())
     fresh_snapshot_service = SnapshotService(
         snapshot_repository=snapshot_repository,
         people_service=fresh_people_service,
@@ -87,10 +89,14 @@ async def test_should_save_periodically(
     snapshot_repository: SnapshotJsonRepository,
     people_service: PeopleService,
     locations_service: LocationsService,
+    movement_service: MovementService,
     snapshot_service: SnapshotService,
 ) -> None:
     person = Person(id="1", location_id="loc1")
     people_service.create_one(person)
+    # Add person to location tracking
+    movement_service.add_person_to_location(person)
+
     periodic_task = asyncio.create_task(snapshot_service.run_periodic_save())
 
     await asyncio.sleep(snapshot_service.interval_seconds + 1)

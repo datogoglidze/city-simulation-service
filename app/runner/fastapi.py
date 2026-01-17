@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.runner.websocket import WebSocketManager
 from app.services.locations import LocationsService
+from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.snapshot import SnapshotService
@@ -25,6 +26,7 @@ class CityApi:
     simulation_service: SimulationService = field(init=False)
     people_service: PeopleService = field(init=False)
     locations_service: LocationsService = field(init=False)
+    movement_service: MovementService = field(init=False)
     snapshot_service: SnapshotService | None = None
 
     def with_router(self, router: APIRouter) -> CityApi:
@@ -52,6 +54,11 @@ class CityApi:
 
         return self
 
+    def with_movement_service(self, movement_service: MovementService) -> CityApi:
+        self.movement_service = movement_service
+
+        return self
+
     def with_snapshot_service(
         self, snapshot_service: SnapshotService | None
     ) -> CityApi:
@@ -72,6 +79,7 @@ class CityApi:
         app.state.snapshot_service = self.snapshot_service
         app.state.people = self.people_service
         app.state.locations = self.locations_service
+        app.state.movement = self.movement_service
 
         for router in self.routes:
             app.include_router(router)

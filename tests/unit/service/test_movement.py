@@ -2,8 +2,10 @@ import pytest
 
 from app.models.person import Location, Person
 from app.repositories.in_memory.locations import LocationsInMemoryRepository
+from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.services.locations import LocationsService
 from app.services.movement import MovementService
+from app.services.people import PeopleService
 
 
 @pytest.fixture
@@ -18,22 +20,38 @@ def locations_service() -> LocationsService:
 
 
 @pytest.fixture
-def movement_service(locations_service: LocationsService) -> MovementService:
-    return MovementService(locations_service=locations_service)
+def people_service() -> PeopleService:
+    return PeopleService(people=PeopleInMemoryRepository())
+
+
+@pytest.fixture
+def movement_service(
+    people_service: PeopleService, locations_service: LocationsService
+) -> MovementService:
+    return MovementService(
+        people_service=people_service,
+        locations_service=locations_service,
+    )
 
 
 def test_should_move_to_adjacent_location(
-    movement_service: MovementService, locations_service: LocationsService
+    movement_service: MovementService,
+    people_service: PeopleService,
+    locations_service: LocationsService,
 ) -> None:
     person = Person(id="1", location_id="5_5")
+    people_service.create_one(person)
+    movement_service.add_person_to_location(person)
 
-    moved_person = movement_service.move_to_random_adjacent_location(person=person)
+    # Pick a random adjacent location
+    new_location = movement_service._pick_random_adjacent_location(person)
+    assert new_location is not None
 
     # Get the actual locations
     original_loc = locations_service.read_one("5_5")
-    moved_loc = locations_service.read_one(moved_person.location_id)
+    moved_loc = locations_service.read_one(new_location.id)
 
-    # Should have moved to adjacent location
+    # Should be adjacent location
     assert (
         abs(moved_loc.q - original_loc.q) <= 1
         and abs(moved_loc.r - original_loc.r) <= 1
@@ -41,17 +59,20 @@ def test_should_move_to_adjacent_location(
 
 
 def test_should_stay_in_place_when_no_valid_moves(
-    movement_service: MovementService, locations_service: LocationsService
+    movement_service: MovementService,
+    people_service: PeopleService,
+    locations_service: LocationsService,
 ) -> None:
     person = Person(id="1", location_id="5_5")
+    people_service.create_one(person)
 
     # Occupy all adjacent locations
-    adjacent_ids = locations_service.get_adjacent_location_ids("5_5")
-    for loc_id in adjacent_ids:
-        loc = locations_service.read_one(loc_id)
+    adjacent_locations = locations_service.get_adjacent_locations("5_5")
+    for location in adjacent_locations:
+        loc = locations_service.read_one(location.id)
         updated = Location(id=loc.id, q=loc.q, r=loc.r, people_ids=["other"])
         locations_service.update_one(updated)
 
-    moved_person = movement_service.move_to_random_adjacent_location(person=person)
+    new_location_id = movement_service._pick_random_adjacent_location(person)
 
-    assert moved_person.location_id == person.location_id
+    assert new_location_id is None

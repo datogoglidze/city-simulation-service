@@ -3,7 +3,10 @@ from starlette import status
 
 from app.models.errors import DoesNotExistError
 from app.models.person import Person
-from app.routers.dependables import PeopleServiceDependable
+from app.routers.dependables import (
+    MovementServiceDependable,
+    PeopleServiceDependable,
+)
 from app.routers.schemas.person import PersonCreate, PersonRead
 
 router = APIRouter(prefix="/people", tags=["People"])
@@ -48,10 +51,15 @@ def read_one(person_id: str, people: PeopleServiceDependable) -> PersonRead:
     status_code=status.HTTP_201_CREATED,
     response_model=PersonRead,
 )
-def create_one(person: PersonCreate, people: PeopleServiceDependable) -> PersonRead:
+def create_one(
+    person: PersonCreate,
+    people: PeopleServiceDependable,
+    movement: MovementServiceDependable,
+) -> PersonRead:
     _person = Person(location_id=person.location_id)
 
     created = people.create_one(_person)
+    movement.add_person_to_location(created)
 
     return PersonRead(
         id=created.id,
@@ -64,8 +72,14 @@ def create_one(person: PersonCreate, people: PeopleServiceDependable) -> PersonR
     status_code=status.HTTP_204_NO_CONTENT,
     response_model=None,
 )
-def delete_one(person_id: str, people: PeopleServiceDependable) -> None:
+def delete_one(
+    person_id: str,
+    people: PeopleServiceDependable,
+    movement: MovementServiceDependable,
+) -> None:
     try:
+        person = people.read_one(person_id)
+        movement.remove_person_from_location(person)
         people.delete_one(person_id)
     except DoesNotExistError as e:
         raise HTTPException(status_code=404, detail=f"Person with id {e.id} not found")

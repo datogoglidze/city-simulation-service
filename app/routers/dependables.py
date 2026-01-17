@@ -5,6 +5,7 @@ from starlette.requests import Request
 
 from app.runner.websocket import WebSocketManager
 from app.services.locations import LocationsService
+from app.services.movement import MovementService
 from app.services.people import PeopleService
 
 
@@ -20,6 +21,13 @@ def get_locations_service(request: Request) -> LocationsService:
 
 
 LocationsServiceDependable = Annotated[LocationsService, Depends(get_locations_service)]
+
+
+def get_movement_service(request: Request) -> MovementService:
+    return request.app.state.movement  # type: ignore
+
+
+MovementServiceDependable = Annotated[MovementService, Depends(get_movement_service)]
 
 
 def get_websocket_manager(websocket: WebSocket) -> WebSocketManager:

@@ -12,6 +12,10 @@ def snapshot() -> SnapshotJsonRepository:
 
 
 def test_should_raise_when_nothing_exist(snapshot: SnapshotJsonRepository) -> None:
+    # Ensure file doesn't exist from previous test
+    if snapshot.snapshot_file.exists():
+        snapshot.snapshot_file.unlink()
+
     with pytest.raises(FileNotFoundError):
         snapshot.load()
 
