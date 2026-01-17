@@ -25,16 +25,10 @@ class SnapshotJsonRepository:
                 for person in people
             ],
             "locations": [
-                {
-                    "id": location.id,
-                    "q": location.q,
-                    "r": location.r,
-                    "people_ids": [person.id for person in location.people],
-                }
+                {"id": location.id, "q": location.q, "r": location.r}
                 for location in locations
             ],
         }
-
         self.snapshot_file.write_text(json.dumps(raw, indent=2))
 
     def load(self) -> SnapshotData:
@@ -43,37 +37,31 @@ class SnapshotJsonRepository:
 
         raw = json.loads(self.snapshot_file.read_text())
 
-        locations_dict = {}
-        for loc_data in raw.get("locations", []):
-            location = Location(
-                id=loc_data["id"],
-                q=loc_data["q"],
-                r=loc_data["r"],
-                people=[],
+        # Step 1: Create locations (without people)
+        existing_locations = {
+            location["id"]: Location(
+                id=location["id"], q=location["q"], r=location["r"], people=[]
             )
-            locations_dict[location.id] = location
+            for location in raw.get("locations", [])
+        }
 
-        people = []
-        for person_data in raw.get("people", []):
-            location = locations_dict[person_data["location_id"]]
-            person = Person(id=person_data["id"], location=location)
-            people.append(person)
+        people = [
+            Person(id=person["id"], location=existing_locations[person["location_id"]])
+            for person in raw.get("people", [])
+        ]
 
-        people_by_location: dict[str, list[Person]] = {}
+        people_by_location_id: dict[str, list[Person]] = {}
         for person in people:
-            if person.location.id not in people_by_location:
-                people_by_location[person.location.id] = []
-            people_by_location[person.location.id].append(person)
+            people_by_location_id.setdefault(person.location.id, []).append(person)
 
-        locations = []
-        for location in locations_dict.values():
-            location_people = people_by_location.get(location.id, [])
-            updated_location = Location(
+        locations = [
+            Location(
                 id=location.id,
                 q=location.q,
                 r=location.r,
-                people=location_people,
+                people=people_by_location_id.get(location.id, []),
             )
-            locations.append(updated_location)
+            for location in existing_locations.values()
+        ]
 
         return SnapshotData(people=people, locations=locations)
