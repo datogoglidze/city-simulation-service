@@ -12,7 +12,9 @@ class PeopleService:
 
     def create_one(self, person: Person) -> Person:
         self.locations.read_one(person.location.id)
+
         created = self.people.create_one(person)
+
         return created
 
     def read_all(self) -> list[Person]:
@@ -22,6 +24,9 @@ class PeopleService:
         return self.people.read_one(person_id)
 
     def update_one(self, person: Person) -> None:
+        if person.location:
+            self.locations.read_one(person.location.id)
+
         self.people.update_one(person)
 
     def delete_one(self, person_id: str) -> None:
