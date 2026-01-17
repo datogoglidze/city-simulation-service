@@ -21,7 +21,17 @@ router = APIRouter(prefix="/people", tags=["People"])
 def read_all(people: PeopleServiceDependable) -> list[PersonRead]:
     _people = people.read_all()
 
-    return [_person_to_schema(person) for person in _people]
+    return [
+        PersonRead(
+            id=person.id,
+            location=PersonLocation(
+                id=person.location.id,
+                q=person.location.q,
+                r=person.location.r,
+            ),
+        )
+        for person in _people
+    ]
 
 
 @router.get(
@@ -40,7 +50,14 @@ def read_one(
             status_code=404, detail=f"{e.resource} with id {e.id} not found"
         )
 
-    return _person_to_schema(_person)
+    return PersonRead(
+        id=_person.id,
+        location=PersonLocation(
+            id=_person.location.id,
+            q=_person.location.q,
+            r=_person.location.r,
+        ),
+    )
 
 
 @router.post(
@@ -56,15 +73,23 @@ def create_one(
 ) -> PersonRead:
     try:
         location = locations.read_one(person.location_id)
-        _person = Person(location=location)
-        created = people.create_one(_person)
-        movement.add_person_to_location(created)
     except DoesNotExistError as e:
         raise HTTPException(
             status_code=404, detail=f"{e.resource} with id {e.id} not found"
         )
 
-    return _person_to_schema(created)
+    _person = Person(location=location)
+    created = people.create_one(_person)
+    movement.add_person_to_location(created)
+
+    return PersonRead(
+        id=created.id,
+        location=PersonLocation(
+            id=created.location.id,
+            q=created.location.q,
+            r=created.location.r,
+        ),
+    )
 
 
 @router.delete(
@@ -85,14 +110,3 @@ def delete_one(
         raise HTTPException(
             status_code=404, detail=f"{e.resource} with id {e.id} not found"
         )
-
-
-def _person_to_schema(person: Person) -> PersonRead:
-    return PersonRead(
-        id=person.id,
-        location=PersonLocation(
-            id=person.location.id,
-            q=person.location.q,
-            r=person.location.r,
-        ),
-    )
