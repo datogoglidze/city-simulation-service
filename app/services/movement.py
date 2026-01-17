@@ -18,10 +18,10 @@ class MovementService:
             return
 
         self.remove_person_from_location(person)
-        self.add_person_to_location(person)
 
         moved_person = Person(id=person.id, location_id=new_location_id)
         self.people_service.update_one(moved_person)
+        self.add_person_to_location(moved_person)
 
     def add_person_to_location(self, person: Person) -> None:
         location = self.locations_service.read_one(person.location_id)

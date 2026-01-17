@@ -1,7 +1,8 @@
 import asyncio
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 
 from app.runner.websocket import WebSocketManager
+from app.services.locations import LocationsService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 
@@ -11,11 +12,24 @@ class SimulationService:
     websocket_manager: WebSocketManager
     people: PeopleService
     movement: MovementService
+    locations: LocationsService
 
     async def broadcast_state(self) -> None:
         if self.websocket_manager.has_active_connections:
-            people = [asdict(person) for person in self.people.read_all()]
-            await self.websocket_manager.broadcast(people)
+            people_data = []
+            for person in self.people.read_all():
+                location = self.locations.read_one(person.location_id)
+                people_data.append(
+                    {
+                        "id": person.id,
+                        "location": {
+                            "id": location.id,
+                            "q": location.q,
+                            "r": location.r,
+                        },
+                    }
+                )
+            await self.websocket_manager.broadcast(people_data)
 
     async def run(self) -> None:
         while True:

@@ -7,7 +7,7 @@ from app.routers.dependables import (
     MovementServiceDependable,
     PeopleServiceDependable,
 )
-from app.routers.schemas.person import PersonCreate, PersonRead
+from app.routers.schemas.person import PersonCreate, PersonLocation, PersonRead
 
 router = APIRouter(prefix="/people", tags=["People"])
 
@@ -20,13 +20,7 @@ router = APIRouter(prefix="/people", tags=["People"])
 def read_all(people: PeopleServiceDependable) -> list[PersonRead]:
     _people = people.read_all()
 
-    return [
-        PersonRead(
-            id=person.id,
-            location_id=person.location_id,
-        )
-        for person in _people
-    ]
+    return [_person_to_schema(person) for person in _people]
 
 
 @router.get(
@@ -34,16 +28,16 @@ def read_all(people: PeopleServiceDependable) -> list[PersonRead]:
     status_code=status.HTTP_200_OK,
     response_model=PersonRead,
 )
-def read_one(person_id: str, people: PeopleServiceDependable) -> PersonRead:
+def read_one(
+    person_id: str,
+    people: PeopleServiceDependable,
+) -> PersonRead:
     try:
         _person = people.read_one(person_id)
     except DoesNotExistError as e:
         raise HTTPException(status_code=404, detail=f"Person with id {e.id} not found")
 
-    return PersonRead(
-        id=_person.id,
-        location_id=_person.location_id,
-    )
+    return _person_to_schema(_person)
 
 
 @router.post(
@@ -58,13 +52,15 @@ def create_one(
 ) -> PersonRead:
     _person = Person(location_id=person.location_id)
 
-    created = people.create_one(_person)
-    movement.add_person_to_location(created)
+    try:
+        created = people.create_one(_person)
+        movement.add_person_to_location(created)
+    except DoesNotExistError as e:
+        raise HTTPException(
+            status_code=404, detail=f"Location with id {e.id} not found"
+        )
 
-    return PersonRead(
-        id=created.id,
-        location_id=created.location_id,
-    )
+    return _person_to_schema(created)
 
 
 @router.delete(
@@ -83,3 +79,17 @@ def delete_one(
         people.delete_one(person_id)
     except DoesNotExistError as e:
         raise HTTPException(status_code=404, detail=f"Person with id {e.id} not found")
+
+
+def _person_to_schema(person: Person) -> PersonRead:
+    if not person.location:
+        raise ValueError(f"Person {person.id} has no location populated")
+
+    return PersonRead(
+        id=person.id,
+        location=PersonLocation(
+            id=person.location.id,
+            q=person.location.q,
+            r=person.location.r,
+        ),
+    )

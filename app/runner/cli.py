@@ -26,9 +26,18 @@ cli = Typer(no_args_is_help=True, add_completion=False)
 def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
     websocket_manager = WebSocketManager()
 
-    locations_service = LocationsService(locations=LocationsInMemoryRepository())
+    locations_repository = LocationsInMemoryRepository()
+    people_repository = PeopleInMemoryRepository()
 
-    people_service = PeopleService(people=PeopleInMemoryRepository())
+    locations_service = LocationsService(
+        locations=locations_repository,
+        people=people_repository,
+    )
+
+    people_service = PeopleService(
+        people=people_repository,
+        locations=locations_repository,
+    )
 
     movement_service = MovementService(
         people_service=people_service,
@@ -68,10 +77,12 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
                     websocket_manager=websocket_manager,
                     people=people_service,
                     movement=movement_service,
+                    locations=locations_service,
                 )
             )
             .with_people_service(people_service)
             .with_locations_service(locations_service)
+            .with_movement_service(movement_service)
             .with_snapshot_service(snapshot_service)
             .build()
         )

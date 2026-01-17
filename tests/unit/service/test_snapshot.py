@@ -19,8 +19,24 @@ def snapshot_repository() -> SnapshotJsonRepository:
 
 
 @pytest.fixture
-def locations_service() -> LocationsService:
-    service = LocationsService(locations=LocationsInMemoryRepository())
+def locations_repository() -> LocationsInMemoryRepository:
+    return LocationsInMemoryRepository()
+
+
+@pytest.fixture
+def people_repository() -> PeopleInMemoryRepository:
+    return PeopleInMemoryRepository()
+
+
+@pytest.fixture
+def locations_service(
+    locations_repository: LocationsInMemoryRepository,
+    people_repository: PeopleInMemoryRepository,
+) -> LocationsService:
+    service = LocationsService(
+        locations=locations_repository,
+        people=people_repository,
+    )
     # Create a location for testing
     location = Location(id="loc1", q=0, r=0, people_ids=[])
     service.create_one(location)
@@ -28,8 +44,14 @@ def locations_service() -> LocationsService:
 
 
 @pytest.fixture
-def people_service() -> PeopleService:
-    return PeopleService(people=PeopleInMemoryRepository())
+def people_service(
+    people_repository: PeopleInMemoryRepository,
+    locations_repository: LocationsInMemoryRepository,
+) -> PeopleService:
+    return PeopleService(
+        people=people_repository,
+        locations=locations_repository,
+    )
 
 
 @pytest.fixture
@@ -63,8 +85,16 @@ def test_should_raise_when_nothing_exist(snapshot_service: SnapshotService) -> N
 
 def test_should_load(snapshot_repository: SnapshotJsonRepository) -> None:
     # Create fresh services for this test to avoid conflicts
-    fresh_locations_service = LocationsService(locations=LocationsInMemoryRepository())
-    fresh_people_service = PeopleService(people=PeopleInMemoryRepository())
+    fresh_locations_repository = LocationsInMemoryRepository()
+    fresh_people_repository = PeopleInMemoryRepository()
+    fresh_locations_service = LocationsService(
+        locations=fresh_locations_repository,
+        people=fresh_people_repository,
+    )
+    fresh_people_service = PeopleService(
+        people=fresh_people_repository,
+        locations=fresh_locations_repository,
+    )
     fresh_snapshot_service = SnapshotService(
         snapshot_repository=snapshot_repository,
         people_service=fresh_people_service,

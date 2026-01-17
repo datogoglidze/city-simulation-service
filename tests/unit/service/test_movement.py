@@ -9,8 +9,24 @@ from app.services.people import PeopleService
 
 
 @pytest.fixture
-def locations_service() -> LocationsService:
-    service = LocationsService(locations=LocationsInMemoryRepository())
+def locations_repository() -> LocationsInMemoryRepository:
+    return LocationsInMemoryRepository()
+
+
+@pytest.fixture
+def people_repository() -> PeopleInMemoryRepository:
+    return PeopleInMemoryRepository()
+
+
+@pytest.fixture
+def locations_service(
+    locations_repository: LocationsInMemoryRepository,
+    people_repository: PeopleInMemoryRepository,
+) -> LocationsService:
+    service = LocationsService(
+        locations=locations_repository,
+        people=people_repository,
+    )
     # Create a 10x10 grid
     for q in range(10):
         for r in range(10):
@@ -20,8 +36,14 @@ def locations_service() -> LocationsService:
 
 
 @pytest.fixture
-def people_service() -> PeopleService:
-    return PeopleService(people=PeopleInMemoryRepository())
+def people_service(
+    people_repository: PeopleInMemoryRepository,
+    locations_repository: LocationsInMemoryRepository,
+) -> PeopleService:
+    return PeopleService(
+        people=people_repository,
+        locations=locations_repository,
+    )
 
 
 @pytest.fixture

@@ -17,8 +17,17 @@ from app.services.simulation import SimulationService
 def client() -> TestClient:
     websocket_manager = WebSocketManager()
 
-    locations_service = LocationsService(locations=LocationsInMemoryRepository())
-    people_service = PeopleService(people=PeopleInMemoryRepository())
+    locations_repository = LocationsInMemoryRepository()
+    people_repository = PeopleInMemoryRepository()
+
+    locations_service = LocationsService(
+        locations=locations_repository,
+        people=people_repository,
+    )
+    people_service = PeopleService(
+        people=people_repository,
+        locations=locations_repository,
+    )
     movement_service = MovementService(
         people_service=people_service,
         locations_service=locations_service,
@@ -27,7 +36,7 @@ def client() -> TestClient:
     # Create a 10x10 grid of locations for testing
     for q in range(10):
         for r in range(10):
-            location = Location(id=f"{q}_{r}", q=q, r=r, people_ids=[])
+            location = Location(q=q, r=r, people_ids=[])
             locations_service.create_one(location)
 
     return TestClient(
@@ -41,6 +50,7 @@ def client() -> TestClient:
                 websocket_manager=websocket_manager,
                 people=people_service,
                 movement=movement_service,
+                locations=locations_service,
             )
         )
         .with_people_service(people_service)

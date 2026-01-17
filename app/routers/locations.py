@@ -3,7 +3,7 @@ from starlette import status
 
 from app.models.errors import DoesNotExistError
 from app.routers.dependables import LocationsServiceDependable
-from app.routers.schemas.location import LocationRead
+from app.routers.schemas.location import LocationPerson, LocationRead
 
 router = APIRouter(prefix="/locations", tags=["Locations"])
 
@@ -21,7 +21,7 @@ def read_all(locations: LocationsServiceDependable) -> list[LocationRead]:
             id=location.id,
             q=location.q,
             r=location.r,
-            people_ids=location.people_ids,
+            people=[LocationPerson(id=person.id) for person in location.people],
         )
         for location in _locations
     ]
@@ -32,7 +32,10 @@ def read_all(locations: LocationsServiceDependable) -> list[LocationRead]:
     status_code=status.HTTP_200_OK,
     response_model=LocationRead,
 )
-def read_one(location_id: str, locations: LocationsServiceDependable) -> LocationRead:
+def read_one(
+    location_id: str,
+    locations: LocationsServiceDependable,
+) -> LocationRead:
     try:
         _location = locations.read_one(location_id)
     except DoesNotExistError as e:
@@ -44,5 +47,5 @@ def read_one(location_id: str, locations: LocationsServiceDependable) -> Locatio
         id=_location.id,
         q=_location.q,
         r=_location.r,
-        people_ids=_location.people_ids,
+        people=[LocationPerson(id=person.id) for person in _location.people],
     )
