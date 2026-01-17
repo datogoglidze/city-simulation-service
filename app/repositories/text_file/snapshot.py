@@ -3,12 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from app.models.person import Location, Person
-
-
-@dataclass
-class SnapshotData:
-    people: list[Person]
-    locations: list[Location]
+from app.models.snapshot import SnapshotData
 
 
 @dataclass

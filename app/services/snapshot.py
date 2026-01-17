@@ -1,7 +1,8 @@
 import asyncio
 from dataclasses import dataclass
 
-from app.repositories.text_file.snapshot import SnapshotData, SnapshotJsonRepository
+from app.models.snapshot import SnapshotData
+from app.repositories.text_file.snapshot import SnapshotJsonRepository
 from app.services.locations import LocationsService
 from app.services.people import PeopleService
 
