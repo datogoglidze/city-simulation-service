@@ -39,12 +39,12 @@ class SnapshotJsonRepository:
 
         locations = [
             Location(
-                id=loc["id"],
-                q=loc["q"],
-                r=loc["r"],
-                people_ids=list(loc.get("people_ids", [])),
+                id=location["id"],
+                q=location["q"],
+                r=location["r"],
+                people_ids=list(location.get("people_ids", [])),
             )
-            for loc in raw.get("locations", [])
+            for location in raw.get("locations", [])
         ]
 
         return SnapshotData(people=people, locations=locations)
