@@ -36,7 +36,9 @@ def read_one(
     try:
         _person = people.read_one(person_id)
     except DoesNotExistError as e:
-        raise HTTPException(status_code=404, detail=f"Person with id {e.id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"{e.resource} with id {e.id} not found"
+        )
 
     return _person_to_schema(_person)
 
@@ -59,7 +61,7 @@ def create_one(
         movement.add_person_to_location(created)
     except DoesNotExistError as e:
         raise HTTPException(
-            status_code=404, detail=f"Location with id {e.id} not found"
+            status_code=404, detail=f"{e.resource} with id {e.id} not found"
         )
 
     return _person_to_schema(created)
@@ -80,7 +82,9 @@ def delete_one(
         movement.remove_person_from_location(person)
         people.delete_one(person_id)
     except DoesNotExistError as e:
-        raise HTTPException(status_code=404, detail=f"Person with id {e.id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"{e.resource} with id {e.id} not found"
+        )
 
 
 def _person_to_schema(person: Person) -> PersonRead:

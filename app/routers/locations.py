@@ -40,7 +40,7 @@ def read_one(
         _location = locations.read_one(location_id)
     except DoesNotExistError as e:
         raise HTTPException(
-            status_code=404, detail=f"Location with id {e.id} not found"
+            status_code=404, detail=f"{e.resource} with id {e.id} not found"
         )
 
     return LocationRead(

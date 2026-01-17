@@ -21,7 +21,7 @@ class PeopleInMemoryRepository:
     def read_one(self, person_id: str) -> Person:
         person = self._people.get(person_id)
         if not person:
-            raise DoesNotExistError(person_id)
+            raise DoesNotExistError(resource="Person", id=person_id)
 
         return person
 
@@ -37,13 +37,13 @@ class PeopleInMemoryRepository:
     def delete_one(self, person_id: str) -> None:
         person = self._people.get(person_id)
         if not person:
-            raise DoesNotExistError(person_id)
+            raise DoesNotExistError(resource="Person", id=person_id)
 
         self._people.pop(person_id, None)
 
     def update_one(self, person: Person) -> None:
         existing = self._people.get(person.id)
         if not existing:
-            raise DoesNotExistError(person.id)
+            raise DoesNotExistError(resource="Person", id=person.id)
 
         self._people[person.id] = person

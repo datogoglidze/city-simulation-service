@@ -21,7 +21,7 @@ class LocationsInMemoryRepository:
     def read_one(self, location_id: str) -> Location:
         location = self._locations.get(location_id)
         if not location:
-            raise DoesNotExistError(location_id)
+            raise DoesNotExistError(resource="Location", id=location_id)
 
         return location
 
@@ -37,6 +37,6 @@ class LocationsInMemoryRepository:
     def update_one(self, location: Location) -> None:
         existing = self._locations.get(location.id)
         if not existing:
-            raise DoesNotExistError(location.id)
+            raise DoesNotExistError(resource="Location", id=location.id)
 
         self._locations[location.id] = location

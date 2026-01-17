@@ -9,3 +9,4 @@ class ExistsError(Exception):
 @dataclass
 class DoesNotExistError(Exception):
     id: str
+    resource: str
