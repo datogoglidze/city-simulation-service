@@ -4,6 +4,7 @@ from starlette import status
 from app.models.errors import DoesNotExistError
 from app.models.person import Person
 from app.routers.dependables import (
+    LocationsServiceDependable,
     MovementServiceDependable,
     PeopleServiceDependable,
 )
@@ -48,11 +49,12 @@ def read_one(
 def create_one(
     person: PersonCreate,
     people: PeopleServiceDependable,
+    locations: LocationsServiceDependable,
     movement: MovementServiceDependable,
 ) -> PersonRead:
-    _person = Person(location_id=person.location_id)
-
     try:
+        location = locations.read_one(person.location_id)
+        _person = Person(location=location)
         created = people.create_one(_person)
         movement.add_person_to_location(created)
     except DoesNotExistError as e:
@@ -82,9 +84,6 @@ def delete_one(
 
 
 def _person_to_schema(person: Person) -> PersonRead:
-    if not person.location:
-        raise ValueError(f"Person {person.id} has no location populated")
-
     return PersonRead(
         id=person.id,
         location=PersonLocation(

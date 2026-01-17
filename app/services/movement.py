@@ -14,32 +14,34 @@ class MovementService:
     locations_service: LocationsService
 
     def move_person_to_location(self, person: Person, new_location_id: str) -> None:
-        if person.location_id == new_location_id:
+        if person.location.id == new_location_id:
             return
 
         self.remove_person_from_location(person)
 
-        moved_person = Person(id=person.id, location_id=new_location_id)
+        new_location = self.locations_service.read_one(new_location_id)
+        moved_person = Person(id=person.id, location=new_location)
         self.people_service.update_one(moved_person)
         self.add_person_to_location(moved_person)
 
     def add_person_to_location(self, person: Person) -> None:
-        location = self.locations_service.read_one(person.location_id)
+        location = self.locations_service.read_one(person.location.id)
+        person_ref = Person(id=person.id, location=location)
         updated_location = Location(
             id=location.id,
             q=location.q,
             r=location.r,
-            people_ids=[*location.people_ids, person.id],
+            people=[*location.people, person_ref],
         )
         self.locations_service.update_one(updated_location)
 
     def remove_person_from_location(self, person: Person) -> None:
-        location = self.locations_service.read_one(person.location_id)
+        location = self.locations_service.read_one(person.location.id)
         updated_location = Location(
             id=location.id,
             q=location.q,
             r=location.r,
-            people_ids=[pid for pid in location.people_ids if pid != person.id],
+            people=[p for p in location.people if p.id != person.id],
         )
         self.locations_service.update_one(updated_location)
 
@@ -52,13 +54,13 @@ class MovementService:
 
     def _pick_random_adjacent_location(self, person: Person) -> Location | None:
         adjacent_locations = self.locations_service.get_adjacent_locations(
-            person.location_id
+            person.location.id
         )
 
         available_locations = [
             location
             for location in adjacent_locations
-            if len(self.locations_service.read_one(location.id).people_ids) == 0
+            if len(self.locations_service.read_one(location.id).people) == 0
         ]
 
         if not available_locations:

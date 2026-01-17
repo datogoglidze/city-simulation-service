@@ -30,7 +30,7 @@ def locations_service(
     # Create a 10x10 grid
     for q in range(10):
         for r in range(10):
-            location = Location(id=f"{q}_{r}", q=q, r=r, people_ids=[])
+            location = Location(id=f"{q}_{r}", q=q, r=r, people=[])
             service.create_one(location)
     return service
 
@@ -61,7 +61,8 @@ def test_should_move_to_adjacent_location(
     people_service: PeopleService,
     locations_service: LocationsService,
 ) -> None:
-    person = Person(id="1", location_id="5_5")
+    location = locations_service.read_one("5_5")
+    person = Person(id="1", location=location)
     people_service.create_one(person)
     movement_service.add_person_to_location(person)
 
@@ -85,14 +86,17 @@ def test_should_stay_in_place_when_no_valid_moves(
     people_service: PeopleService,
     locations_service: LocationsService,
 ) -> None:
-    person = Person(id="1", location_id="5_5")
+    location = locations_service.read_one("5_5")
+    person = Person(id="1", location=location)
     people_service.create_one(person)
 
     # Occupy all adjacent locations
     adjacent_locations = locations_service.get_adjacent_locations("5_5")
     for location in adjacent_locations:
         loc = locations_service.read_one(location.id)
-        updated = Location(id=loc.id, q=loc.q, r=loc.r, people_ids=["other"])
+        # Create a dummy person for each adjacent location
+        dummy_person = Person(id="other", location=loc)
+        updated = Location(id=loc.id, q=loc.q, r=loc.r, people=[dummy_person])
         locations_service.update_one(updated)
 
     new_location_id = movement_service._pick_random_adjacent_location(person)

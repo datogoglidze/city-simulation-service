@@ -113,15 +113,15 @@ class CityInitializer:
         if self.people_amount > max_people:
             raise ValueError(f"Too many people to initialize. max: {max_people}")
 
-        all_location_ids = []
+        all_locations = []
         for q in range(self.grid_size):
             for r in range(self.grid_size):
-                location = Location(q=q, r=r, people_ids=[])
+                location = Location(q=q, r=r, people=[])
                 self.locations_service.create_one(location)
-                all_location_ids.append(location.id)
+                all_locations.append(location)
 
-        selected_location_ids = random.sample(all_location_ids, self.people_amount)
-        for location_id in selected_location_ids:
-            person = Person(location_id=location_id)
+        selected_locations = random.sample(all_locations, self.people_amount)
+        for location in selected_locations:
+            person = Person(location=location)
             self.people_service.create_one(person)
             self.movement_service.add_person_to_location(person)

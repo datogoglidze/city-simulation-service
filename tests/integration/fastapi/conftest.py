@@ -36,7 +36,7 @@ def client() -> TestClient:
     # Create a 10x10 grid of locations for testing
     for q in range(10):
         for r in range(10):
-            location = Location(q=q, r=r, people_ids=[])
+            location = Location(q=q, r=r, people=[])
             locations_service.create_one(location)
 
     return TestClient(

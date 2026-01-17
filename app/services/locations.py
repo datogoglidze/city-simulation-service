@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from app.models.person import Location, Person
+from app.models.person import Location
 from app.repositories.in_memory.locations import LocationsInMemoryRepository
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 
@@ -11,16 +11,13 @@ class LocationsService:
     people: PeopleInMemoryRepository
 
     def create_one(self, location: Location) -> Location:
-        created = self.locations.create_one(location)
-        return self._hydrate_location(created)
+        return self.locations.create_one(location)
 
     def read_all(self) -> list[Location]:
-        locations = list(self.locations)
-        return [self._hydrate_location(location) for location in locations]
+        return list(self.locations)
 
     def read_one(self, location_id: str) -> Location:
-        location = self.locations.read_one(location_id)
-        return self._hydrate_location(location)
+        return self.locations.read_one(location_id)
 
     def update_one(self, location: Location) -> None:
         self.locations.update_one(location)
@@ -51,18 +48,3 @@ class LocationsService:
                 adjacent_ids.append(coord_to_id[(new_q, new_r)])
 
         return adjacent_ids
-
-    def _hydrate_location(self, location: Location) -> Location:
-        """Return a Location with its People objects populated."""
-        people = [
-            Person(id=person.id, location_id=person.location_id)
-            for person_id in location.people_ids
-            if (person := self.people._people.get(person_id)) is not None
-        ]
-        return Location(
-            id=location.id,
-            q=location.q,
-            r=location.r,
-            people_ids=location.people_ids,
-            people=people,
-        )

@@ -38,7 +38,7 @@ def locations_service(
         people=people_repository,
     )
     # Create a location for testing
-    location = Location(id="loc1", q=0, r=0, people_ids=[])
+    location = Location(id="loc1", q=0, r=0, people=[])
     service.create_one(location)
     return service
 
@@ -102,14 +102,19 @@ def test_should_load(snapshot_repository: SnapshotJsonRepository) -> None:
         interval_seconds=1,
     )
 
-    person = Person(id="1", location_id="loc1")
-    location = Location(id="loc1", q=0, r=0, people_ids=["1"])
-    snapshot_repository.save([person], [location])
+    location = Location(id="loc1", q=0, r=0, people=[])
+    person = Person(id="1", location=location)
+    location_with_person = Location(id="loc1", q=0, r=0, people=[person])
+    snapshot_repository.save([person], [location_with_person])
 
     loaded = fresh_snapshot_service.load_snapshot()
 
-    assert loaded.people == [person]
-    assert loaded.locations == [location]
+    assert len(loaded.people) == 1
+    assert loaded.people[0].id == "1"
+    assert loaded.people[0].location.id == "loc1"
+    assert len(loaded.locations) == 1
+    assert loaded.locations[0].id == "loc1"
+    assert len(loaded.locations[0].people) == 1
 
     snapshot_repository.snapshot_file.unlink()
 
@@ -122,7 +127,8 @@ async def test_should_save_periodically(
     movement_service: MovementService,
     snapshot_service: SnapshotService,
 ) -> None:
-    person = Person(id="1", location_id="loc1")
+    location = locations_service.read_one("loc1")
+    person = Person(id="1", location=location)
     people_service.create_one(person)
     # Add person to location tracking
     movement_service.add_person_to_location(person)
@@ -135,8 +141,9 @@ async def test_should_save_periodically(
         await periodic_task
     loaded = snapshot_repository.load()
 
-    assert loaded.people == [person]
+    assert len(loaded.people) == 1
+    assert loaded.people[0].id == "1"
     # Location should have person in it
-    assert any(loc.id == "loc1" and "1" in loc.people_ids for loc in loaded.locations)
+    assert any(loc.id == "loc1" and len(loc.people) == 1 for loc in loaded.locations)
 
     snapshot_repository.snapshot_file.unlink()
