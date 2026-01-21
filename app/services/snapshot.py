@@ -1,7 +1,7 @@
 import asyncio
 from dataclasses import dataclass
 
-from app.models.snapshot import SnapshotData
+from app.models.snapshot import Snapshot
 from app.repositories.text_file.snapshot import SnapshotJsonRepository
 from app.services.locations import LocationsService
 from app.services.people import PeopleService
@@ -14,7 +14,7 @@ class SnapshotService:
     locations_service: LocationsService
     interval_seconds: int
 
-    def load_snapshot(self) -> SnapshotData:
+    def load_snapshot(self) -> Snapshot:
         snapshot_data = self.snapshot_repository.load()
 
         for location in snapshot_data.locations:

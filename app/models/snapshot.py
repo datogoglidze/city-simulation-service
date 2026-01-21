@@ -4,6 +4,6 @@ from app.models.person import Location, Person
 
 
 @dataclass
-class SnapshotData:
+class Snapshot:
     people: list[Person]
     locations: list[Location]

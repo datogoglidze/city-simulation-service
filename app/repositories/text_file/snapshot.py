@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from app.models.person import Location, Person
-from app.models.snapshot import SnapshotData
+from app.models.snapshot import Snapshot
 
 
 @dataclass
@@ -26,23 +29,19 @@ class SnapshotJsonRepository:
         }
         self.snapshot_file.write_text(json.dumps(raw, indent=2))
 
-    def load(self) -> SnapshotData:
-        if not self.snapshot_file.exists():
-            raise FileNotFoundError(f"Snapshot file not found at {self.snapshot_file}")
+    def load(self) -> Snapshot:
+        snapshot = self._fetch_snapshot()
 
-        raw = json.loads(self.snapshot_file.read_text())
-
-        # Step 1: Create locations (without people)
         existing_locations = {
             location["id"]: Location(
                 id=location["id"], q=location["q"], r=location["r"], people=[]
             )
-            for location in raw.get("locations", [])
+            for location in snapshot.locations()
         }
 
         people = [
             Person(id=person["id"], location=existing_locations[person["location_id"]])
-            for person in raw.get("people", [])
+            for person in snapshot.people()
         ]
 
         people_by_location_id: dict[str, list[Person]] = {}
@@ -59,4 +58,25 @@ class SnapshotJsonRepository:
             for location in existing_locations.values()
         ]
 
-        return SnapshotData(people=people, locations=locations)
+        return Snapshot(people=people, locations=locations)
+
+    def _fetch_snapshot(self) -> _RawSnapshotData:
+        if not self.snapshot_file.exists():
+            raise FileNotFoundError(f"Snapshot file not found at {self.snapshot_file}")
+
+        return _RawSnapshotData(self.snapshot_file.read_text())
+
+
+@dataclass
+class _RawSnapshotData:
+    raw: str
+
+    @property
+    def json(self) -> dict[str, Any]:
+        return dict(json.loads(self.raw))
+
+    def locations(self) -> list[dict[str, Any]]:
+        return list(self.json.get("locations", []))
+
+    def people(self) -> list[dict[str, Any]]:
+        return list(self.json.get("people", []))
