@@ -2,16 +2,17 @@ import random
 from dataclasses import dataclass
 
 from app.models.person import Location, Person
+from app.repositories.in_memory.people import PeopleInMemoryRepository
 
 
 @dataclass
 class MovementService:
     grid_size: int
+    people: PeopleInMemoryRepository
 
     def move_to_random_adjacent_location(
         self,
         person: Person,
-        occupied_locations: set[Location],
     ) -> Person:
         adjacent_directions = [
             (1, 0),  # East
@@ -23,6 +24,8 @@ class MovementService:
         ]
 
         random.shuffle(adjacent_directions)
+
+        occupied_locations = {p.location for p in self.people if p.id != person.id}
 
         for dq, dr in adjacent_directions:
             new_q = person.location.q + dq

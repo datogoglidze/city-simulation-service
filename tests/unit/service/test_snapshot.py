@@ -20,9 +20,11 @@ def snapshot_repository() -> PeopleSnapshotJsonRepository:
 
 @pytest.fixture
 def people_service() -> PeopleService:
+    people_repository = PeopleInMemoryRepository()
+
     return PeopleService(
-        people=PeopleInMemoryRepository(),
-        movement=MovementService(grid_size=10),
+        people=people_repository,
+        movement=MovementService(grid_size=10, people=people_repository),
     )
 
 

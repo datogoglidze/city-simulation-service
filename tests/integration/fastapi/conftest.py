@@ -13,10 +13,11 @@ from app.services.simulation import SimulationService
 @pytest.fixture
 def client() -> TestClient:
     websocket_manager = WebSocketManager()
+    people_repository = PeopleInMemoryRepository()
 
     people_service = PeopleService(
-        people=PeopleInMemoryRepository(),
-        movement=MovementService(grid_size=10),
+        people=people_repository,
+        movement=MovementService(grid_size=10, people=people_repository),
     )
 
     return TestClient(

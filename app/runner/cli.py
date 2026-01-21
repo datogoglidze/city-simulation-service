@@ -23,10 +23,11 @@ cli = Typer(no_args_is_help=True, add_completion=False)
 @cli.command()
 def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
     websocket_manager = WebSocketManager()
+    people_repository = PeopleInMemoryRepository()
 
     people_service = PeopleService(
-        people=PeopleInMemoryRepository(),
-        movement=MovementService(grid_size=config.GRID_SIZE),
+        people=people_repository,
+        movement=MovementService(grid_size=config.GRID_SIZE, people=people_repository),
     )
 
     snapshot_service = SnapshotFactory.create(
