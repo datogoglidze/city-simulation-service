@@ -25,15 +25,7 @@ class PeopleService:
         self.people.delete_one(person_id)
 
     def update_locations(self) -> None:
-        occupied_locations = {person.location for person in self.people}
-
         for person in self.people:
-            moved_person = self.movement.move_to_random_adjacent_location(
-                person, occupied_locations
-            )
+            moved_person = self.movement.move_to_random_adjacent_location(person)
             with suppress(DoesNotExistError):
                 self.people.update_one(moved_person)
-
-            if moved_person.location != person.location:
-                occupied_locations.discard(person.location)
-            occupied_locations.add(moved_person.location)
