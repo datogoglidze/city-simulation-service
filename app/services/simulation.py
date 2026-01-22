@@ -2,6 +2,7 @@ import asyncio
 from dataclasses import asdict, dataclass
 
 from app.runner.websocket import WebSocketManager
+from app.services.movement import MovementService
 from app.services.people import PeopleService
 
 
@@ -9,6 +10,7 @@ from app.services.people import PeopleService
 class SimulationService:
     websocket_manager: WebSocketManager
     people: PeopleService
+    movement: MovementService
 
     async def broadcast_state(self) -> None:
         if self.websocket_manager.has_active_connections:
@@ -17,6 +19,6 @@ class SimulationService:
 
     async def run(self) -> None:
         while True:
-            self.people.update_locations()
+            self.movement.update_locations()
             await self.broadcast_state()
             await asyncio.sleep(1)

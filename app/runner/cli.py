@@ -25,10 +25,11 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
     websocket_manager = WebSocketManager()
     people_repository = PeopleInMemoryRepository()
 
-    people_service = PeopleService(
-        people=people_repository,
-        movement=MovementService(grid_size=config.GRID_SIZE, people=people_repository),
+    movement_service = MovementService(
+        grid_size=config.GRID_SIZE, people=people_repository
     )
+
+    people_service = PeopleService(people=people_repository)
 
     snapshot_service = SnapshotFactory.create(
         snapshot_path=config.SNAPSHOT_PATH,
@@ -58,6 +59,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
                 simulation_service=SimulationService(
                     websocket_manager=websocket_manager,
                     people=people_service,
+                    movement=movement_service,
                 )
             )
             .with_people_service(people_service)
