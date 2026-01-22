@@ -10,10 +10,12 @@ class MovementService:
     grid_size: int
     people: PeopleInMemoryRepository
 
-    def move_to_random_adjacent_location(
-        self,
-        person: Person,
-    ) -> Person:
+    def update_locations(self) -> None:
+        for person in self.people:
+            moved_person = self.move_to_random_adjacent_location(person)
+            self.people.update_one(moved_person)
+
+    def move_to_random_adjacent_location(self, person: Person) -> Person:
         adjacent_directions = [
             (1, 0),  # East
             (1, -1),  # Northeast

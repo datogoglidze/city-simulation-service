@@ -11,14 +11,22 @@ from app.services.simulation import SimulationService
 
 
 @pytest.fixture
-def client() -> TestClient:
-    websocket_manager = WebSocketManager()
-    people_repository = PeopleInMemoryRepository()
+def people_repository() -> PeopleInMemoryRepository:
+    return PeopleInMemoryRepository()
 
-    people_service = PeopleService(
-        people=people_repository,
-        movement=MovementService(grid_size=10, people=people_repository),
-    )
+
+@pytest.fixture
+def movement_service(people_repository: PeopleInMemoryRepository) -> MovementService:
+    return MovementService(grid_size=10, people=people_repository)
+
+
+@pytest.fixture
+def client(
+    people_repository: PeopleInMemoryRepository, movement_service: MovementService
+) -> TestClient:
+    websocket_manager = WebSocketManager()
+
+    people_service = PeopleService(people=people_repository)
 
     return TestClient(
         app=CityApi()
@@ -29,6 +37,7 @@ def client() -> TestClient:
             simulation_service=SimulationService(
                 websocket_manager=websocket_manager,
                 people=people_service,
+                movement=movement_service,
             )
         )
         .with_people_service(people_service)
