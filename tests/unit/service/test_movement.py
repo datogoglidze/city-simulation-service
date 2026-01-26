@@ -28,11 +28,13 @@ def test_should_move_to_adjacent_location(
     person: Person,
     movement_service: MovementService,
 ) -> None:
-    moved_person = movement_service.move_to_random_adjacent_location(person=person)
+    generated_location = movement_service._generate_random_adjacent_location_for(
+        person=person
+    )
 
     assert (
-        abs(moved_person.location.q - person.location.q) == 1
-        or abs(moved_person.location.r - person.location.r) == 1
+        abs(generated_location.q - person.location.q) == 1
+        or abs(generated_location.r - person.location.r) == 1
     )
 
 
@@ -44,6 +46,8 @@ def test_should_stay_in_place_when_no_valid_moves(
     people_service.create_one(Person(id="2", location=Location(q=0, r=1)))
     people_service.create_one(Person(id="3", location=Location(q=1, r=0)))
 
-    moved_person = movement_service.move_to_random_adjacent_location(person=person)
+    generated_location = movement_service._generate_random_adjacent_location_for(
+        person=person
+    )
 
-    assert moved_person.location == person.location
+    assert generated_location == person.location
