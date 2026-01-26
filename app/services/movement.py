@@ -17,7 +17,7 @@ class MovementService:
             self.people.update_one(updated_person)
 
     def _generate_random_adjacent_location_for(self, person: Person) -> Location:
-        adjacent_directions = [
+        directions = [
             (1, 0),  # East
             (1, -1),  # Northeast
             (0, -1),  # Northwest
@@ -26,11 +26,11 @@ class MovementService:
             (0, 1),  # Southeast
         ]
 
-        random.shuffle(adjacent_directions)
+        random.shuffle(directions)
 
         occupied = self._occupied_locations()
 
-        for dq, dr in adjacent_directions:
+        for dq, dr in directions:
             new_q = person.location.q + dq
             new_r = person.location.r + dr
 
