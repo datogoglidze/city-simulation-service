@@ -10,7 +10,7 @@ class MovementService:
     grid_size: int
     people: PeopleService
 
-    def update_locations(self) -> None:
+    def move_people_to_random_adjacent_location(self) -> None:
         for person in self.people.read_all():
             generated_location = self._generate_random_adjacent_location_for(person)
             updated_person = Person(id=person.id, location=generated_location)
