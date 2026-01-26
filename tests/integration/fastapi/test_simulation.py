@@ -32,7 +32,7 @@ def test_should_broadcast_updated_locations(
         first_data = websocket.receive_json()
         assert first_data == [{"id": ANY, "location": {"q": 0, "r": 0}}]
 
-        movement_service.update_locations()
+        movement_service.move_people_to_random_adjacent_location()
 
         asyncio.run(client.app.state.simulation.broadcast_state())  # type: ignore
 

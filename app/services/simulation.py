@@ -19,6 +19,6 @@ class SimulationService:
 
     async def run(self) -> None:
         while True:
-            self.movement.update_locations()
+            self.movement.move_people_to_random_adjacent_location()
             await self.broadcast_state()
             await asyncio.sleep(1)
