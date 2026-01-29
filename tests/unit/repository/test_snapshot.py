@@ -4,6 +4,7 @@ import pytest
 
 from tests.fake import FakePerson
 
+from app.models.person import PersonRole
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
 
 
@@ -34,10 +35,11 @@ def test_should_save(
     snapshot.snapshot_file.unlink()
 
 
+@pytest.mark.parametrize("person_role", [PersonRole.citizen, PersonRole.killer])
 def test_should_load(
-    snapshot: PeopleSnapshotJsonRepository,
+    snapshot: PeopleSnapshotJsonRepository, person_role: PersonRole
 ) -> None:
-    person = FakePerson().entity
+    person = FakePerson(role=person_role).entity
     snapshot.save([person])
 
     people = snapshot.load()
