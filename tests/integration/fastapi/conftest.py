@@ -5,6 +5,7 @@ from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.routers import people, simulation
 from app.runner.fastapi import CityApi
 from app.runner.websocket import WebSocketManager
+from app.services.actions import ActionsService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
@@ -17,13 +18,23 @@ def people_service() -> PeopleService:
 
 
 @pytest.fixture
-def movement_service(people_service: PeopleService) -> MovementService:
+def actions_service(people_service: PeopleService) -> ActionsService:
+    return ActionsService(people=people_service)
+
+
+@pytest.fixture
+def movement_service(
+    people_service: PeopleService,
+    actions_service: ActionsService,
+) -> MovementService:
     return MovementService(grid_size=10, people=people_service)
 
 
 @pytest.fixture
 def client(
-    people_service: PeopleService, movement_service: MovementService
+    people_service: PeopleService,
+    movement_service: MovementService,
+    actions_service: ActionsService,
 ) -> TestClient:
     websocket_manager = WebSocketManager()
 
@@ -37,6 +48,7 @@ def client(
                 websocket_manager=websocket_manager,
                 people=people_service,
                 movement=movement_service,
+                actions=actions_service,
             )
         )
         .with_people_service(people_service)

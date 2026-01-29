@@ -8,6 +8,8 @@ load_dotenv()
 class Config:
     GRID_SIZE: int = int(os.getenv("GRID_SIZE", "100"))
     PEOPLE_AMOUNT: int = int(os.getenv("PEOPLE_AMOUNT", "100"))
+    KILLER_PROBABILITY: float = float(os.getenv("KILLER_PROBABILITY", "0.1"))
+    POLICE_PROBABILITY: float = float(os.getenv("POLICE_PROBABILITY", "0.3"))
     SNAPSHOT_PATH: str | None = os.getenv("SNAPSHOT_PATH")
     SNAPSHOT_INTERVAL: str | None = os.getenv("SNAPSHOT_INTERVAL")
 

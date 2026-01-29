@@ -26,7 +26,14 @@ def test_should_not_read_when_does_not_exist(client: TestClient) -> None:
     }
 
 
-@pytest.mark.parametrize("person_role", [PersonRole.citizen, PersonRole.killer])
+@pytest.mark.parametrize(
+    "person_role",
+    [
+        PersonRole.citizen,
+        PersonRole.killer,
+        PersonRole.police,
+    ],
+)
 def test_should_create_one(client: TestClient, person_role: PersonRole) -> None:
     person = FakePerson(role=person_role)
 
@@ -36,7 +43,14 @@ def test_should_create_one(client: TestClient, person_role: PersonRole) -> None:
     assert response.json() == {"id": ANY, **person.json()}
 
 
-@pytest.mark.parametrize("person_role", [PersonRole.citizen, PersonRole.killer])
+@pytest.mark.parametrize(
+    "person_role",
+    [
+        PersonRole.citizen,
+        PersonRole.killer,
+        PersonRole.police,
+    ],
+)
 def test_should_read_one(client: TestClient, person_role: PersonRole) -> None:
     person = FakePerson(role=person_role)
     created = client.post("/people", json=person.json())
@@ -47,7 +61,14 @@ def test_should_read_one(client: TestClient, person_role: PersonRole) -> None:
     assert response.json() == {"id": created.json()["id"], **person.json()}
 
 
-@pytest.mark.parametrize("person_role", [PersonRole.citizen, PersonRole.killer])
+@pytest.mark.parametrize(
+    "person_role",
+    [
+        PersonRole.citizen,
+        PersonRole.killer,
+        PersonRole.police,
+    ],
+)
 def test_should_read_many(client: TestClient, person_role: PersonRole) -> None:
     person_1 = FakePerson(role=person_role)
     person_2 = FakePerson(role=person_role)

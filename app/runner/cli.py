@@ -12,6 +12,7 @@ from app.runner.config import config
 from app.runner.factory import SnapshotFactory
 from app.runner.fastapi import CityApi, UvicornServer
 from app.runner.websocket import WebSocketManager
+from app.services.actions import ActionsService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
@@ -27,8 +28,11 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
 
     people_service = PeopleService(people=people_repository)
 
+    actions_service = ActionsService(people=people_service)
+
     movement_service = MovementService(
-        grid_size=config.GRID_SIZE, people=people_service
+        grid_size=config.GRID_SIZE,
+        people=people_service,
     )
 
     snapshot_service = SnapshotFactory.create(
@@ -42,6 +46,8 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         grid_size=config.GRID_SIZE,
         people_amount=config.PEOPLE_AMOUNT,
         people_service=people_service,
+        killer_probability=config.KILLER_PROBABILITY,
+        police_probability=config.POLICE_PROBABILITY,
     )
 
     (
@@ -60,6 +66,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
                     websocket_manager=websocket_manager,
                     people=people_service,
                     movement=movement_service,
+                    actions=actions_service,
                 )
             )
             .with_people_service(people_service)
@@ -74,6 +81,8 @@ class PeopleInitializer:
     snapshot_service: SnapshotService | None
     grid_size: int
     people_amount: int
+    killer_probability: float
+    police_probability: float
     people_service: PeopleService
 
     def initialize(self) -> None:
@@ -98,6 +107,13 @@ class PeopleInitializer:
         ]
 
         for location in random.sample(all_locations, self.people_amount):
-            self.people_service.create_one(
-                Person(location=location, role=PersonRole.citizen)
-            )
+            rand = random.random()
+
+            if rand < self.killer_probability:
+                role = PersonRole.killer
+            elif rand < self.killer_probability + self.police_probability:
+                role = PersonRole.police
+            else:
+                role = PersonRole.citizen
+
+            self.people_service.create_one(Person(location=location, role=role))
