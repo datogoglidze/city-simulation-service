@@ -47,6 +47,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         people_amount=config.PEOPLE_AMOUNT,
         people_service=people_service,
         killer_probability=config.KILLER_PROBABILITY,
+        police_probability=config.POLICE_PROBABILITY,
     )
 
     (
@@ -81,6 +82,7 @@ class PeopleInitializer:
     grid_size: int
     people_amount: int
     killer_probability: float
+    police_probability: float
     people_service: PeopleService
 
     def initialize(self) -> None:
@@ -105,9 +107,13 @@ class PeopleInitializer:
         ]
 
         for location in random.sample(all_locations, self.people_amount):
-            role = (
-                PersonRole.killer
-                if random.random() < self.killer_probability
-                else PersonRole.citizen
-            )
+            rand = random.random()
+
+            if rand < self.killer_probability:
+                role = PersonRole.killer
+            elif rand < self.killer_probability + self.police_probability:
+                role = PersonRole.police
+            else:
+                role = PersonRole.citizen
+
             self.people_service.create_one(Person(location=location, role=role))

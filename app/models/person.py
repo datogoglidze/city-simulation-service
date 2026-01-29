@@ -6,6 +6,7 @@ from uuid import uuid4
 class PersonRole(str, Enum):
     citizen = "citizen"
     killer = "killer"
+    police = "police"
 
 
 @dataclass(frozen=True)

@@ -16,6 +16,12 @@ class ActionsService:
                     if adjacent_person.role == PersonRole.citizen:
                         self.people.delete_one(adjacent_person.id)
 
+            if person.role == PersonRole.police:
+                adjacent_people = self._get_adjacent_people_of(person)
+                for adjacent_person in adjacent_people:
+                    if adjacent_person.role == PersonRole.killer:
+                        self.people.delete_one(adjacent_person.id)
+
     def _get_adjacent_people_of(self, person: Person) -> list[Person]:
         directions = [
             (1, 0),  # East
