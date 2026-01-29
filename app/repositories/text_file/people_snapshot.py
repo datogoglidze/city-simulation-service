@@ -5,7 +5,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from app.models.person import Location, Person, PersonRoles
+from app.models.person import Location, Person, PersonRole
 
 
 @dataclass
@@ -27,7 +27,7 @@ class PeopleSnapshotJsonRepository:
             Person(
                 id=person["id"],
                 location=Location(**person["location"]),
-                role=PersonRoles(person["role"]),
+                role=PersonRole(person["role"]),
             )
             for person in snapshot.people()
         ]

@@ -3,7 +3,7 @@ from enum import Enum
 from uuid import uuid4
 
 
-class PersonRoles(str, Enum):
+class PersonRole(str, Enum):
     citizen = "citizen"
     killer = "killer"
 
@@ -17,6 +17,6 @@ class Location:
 @dataclass(frozen=True)
 class Person:
     location: Location
-    role: PersonRoles
+    role: PersonRole
 
     id: str = field(default_factory=lambda: str(uuid4()))

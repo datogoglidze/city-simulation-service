@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.models.person import PersonRoles
+from app.models.person import PersonRole
 from app.runner.config import config
 
 
@@ -11,10 +11,10 @@ class PersonLocation(BaseModel):
 
 class PersonCreate(BaseModel):
     location: PersonLocation
-    role: PersonRoles
+    role: PersonRole
 
 
 class PersonRead(BaseModel):
     id: str
     location: PersonLocation
-    role: PersonRoles
+    role: PersonRole

@@ -4,13 +4,13 @@ from typing import Any
 
 from faker import Faker
 
-from app.models.person import Location, Person, PersonRoles
+from app.models.person import Location, Person, PersonRole
 
 
 @dataclass(frozen=True)
 class FakePerson:
     faker: Faker = Faker()
-    role: PersonRoles | None = None
+    role: PersonRole | None = None
     location: Location | None = None
 
     @cached_property
@@ -23,7 +23,7 @@ class FakePerson:
                     r=self.faker.random_int(min=0, max=10),
                 )
             ),
-            role=self.role or PersonRoles.citizen,
+            role=self.role or PersonRole.citizen,
         )
 
     def json(self) -> dict[str, Any]:
