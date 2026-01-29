@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from typer import Typer
 
-from app.models.person import Location, Person
+from app.models.person import Location, Person, PersonRole
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.routers import people, simulation
 from app.runner.config import config
@@ -98,4 +98,6 @@ class PeopleInitializer:
         ]
 
         for location in random.sample(all_locations, self.people_amount):
-            self.people_service.create_one(Person(location=location))
+            self.people_service.create_one(
+                Person(location=location, role=PersonRole.citizen)
+            )

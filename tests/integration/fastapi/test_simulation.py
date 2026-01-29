@@ -3,12 +3,16 @@ from unittest.mock import ANY
 
 from starlette.testclient import TestClient
 
+from tests.fake import FakePerson
+
 from app.services.movement import MovementService
 
 
 def test_should_broadcast_person_via_websocket(client: TestClient) -> None:
-    client.post("/people", json={"location": {"q": 0, "r": 0}})
-    client.post("/people", json={"location": {"q": 1, "r": 1}})
+    person_1 = FakePerson()
+    person_2 = FakePerson()
+    client.post("/people", json=person_1.json())
+    client.post("/people", json=person_2.json())
 
     with client.websocket_connect("/simulation/ws") as websocket:
         asyncio.run(client.app.state.simulation.broadcast_state())  # type: ignore
@@ -16,21 +20,22 @@ def test_should_broadcast_person_via_websocket(client: TestClient) -> None:
         data = websocket.receive_json()
 
         assert data == [
-            {"id": ANY, "location": {"q": 0, "r": 0}},
-            {"id": ANY, "location": {"q": 1, "r": 1}},
+            {"id": ANY, **person_1.json()},
+            {"id": ANY, **person_2.json()},
         ]
 
 
 def test_should_broadcast_updated_locations(
     client: TestClient, movement_service: MovementService
 ) -> None:
-    client.post("/people", json={"location": {"q": 0, "r": 0}})
+    person = FakePerson()
+    client.post("/people", json=person.json())
 
     with client.websocket_connect("/simulation/ws") as websocket:
         asyncio.run(client.app.state.simulation.broadcast_state())  # type: ignore
 
         first_data = websocket.receive_json()
-        assert first_data == [{"id": ANY, "location": {"q": 0, "r": 0}}]
+        assert first_data == [{"id": ANY, **person.json()}]
 
         movement_service.move_people_to_random_adjacent_location()
 
