@@ -35,7 +35,14 @@ def test_should_save(
     snapshot.snapshot_file.unlink()
 
 
-@pytest.mark.parametrize("person_role", [PersonRole.citizen, PersonRole.killer])
+@pytest.mark.parametrize(
+    "person_role",
+    [
+        PersonRole.citizen,
+        PersonRole.killer,
+        PersonRole.police,
+    ],
+)
 def test_should_load(
     snapshot: PeopleSnapshotJsonRepository, person_role: PersonRole
 ) -> None:

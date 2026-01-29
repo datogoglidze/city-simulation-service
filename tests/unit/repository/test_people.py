@@ -20,7 +20,14 @@ def test_should_read_nothing_when_nothing_exist(
     assert len(existing_people) == 0
 
 
-@pytest.mark.parametrize("person_role", [PersonRole.citizen, PersonRole.killer])
+@pytest.mark.parametrize(
+    "person_role",
+    [
+        PersonRole.citizen,
+        PersonRole.killer,
+        PersonRole.police,
+    ],
+)
 def test_should_create_one(
     people: PeopleInMemoryRepository, person_role: PersonRole
 ) -> None:
@@ -44,7 +51,14 @@ def test_should_not_read_when_does_not_exist(people: PeopleInMemoryRepository) -
         people.read_one(FakePerson().entity.id)
 
 
-@pytest.mark.parametrize("person_role", [PersonRole.citizen, PersonRole.killer])
+@pytest.mark.parametrize(
+    "person_role",
+    [
+        PersonRole.citizen,
+        PersonRole.killer,
+        PersonRole.police,
+    ],
+)
 def test_should_read_one(
     people: PeopleInMemoryRepository, person_role: PersonRole
 ) -> None:
@@ -79,7 +93,14 @@ def test_should_not_update_when_does_not_exist(
         people.update_one(FakePerson().entity)
 
 
-@pytest.mark.parametrize("person_role", [PersonRole.citizen, PersonRole.killer])
+@pytest.mark.parametrize(
+    "person_role",
+    [
+        PersonRole.citizen,
+        PersonRole.killer,
+        PersonRole.police,
+    ],
+)
 def test_should_update_one(
     people: PeopleInMemoryRepository, person_role: PersonRole
 ) -> None:
