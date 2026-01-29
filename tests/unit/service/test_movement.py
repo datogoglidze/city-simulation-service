@@ -4,6 +4,7 @@ from tests.fake import FakePerson
 
 from app.models.person import Location, Person
 from app.repositories.in_memory.people import PeopleInMemoryRepository
+from app.services.actions import ActionsService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 
@@ -22,7 +23,15 @@ def people_service(person: Person) -> PeopleService:
 
 
 @pytest.fixture
-def movement_service(people_service: PeopleService) -> MovementService:
+def actions_service(people_service: PeopleService) -> ActionsService:
+    return ActionsService(people=people_service)
+
+
+@pytest.fixture
+def movement_service(
+    people_service: PeopleService,
+    actions_service: ActionsService,
+) -> MovementService:
     return MovementService(grid_size=10, people=people_service)
 
 
