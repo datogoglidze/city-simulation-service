@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -278,9 +278,8 @@
           console.log(`✅ Loaded config: Grid Size = ${gridSize}`);
 
           // Update subtitle
-          document.querySelector(
-            ".subtitle"
-          ).textContent = `Watch people move in a ${gridSize}x${gridSize} Hex Grid`;
+          document.querySelector(".subtitle").textContent =
+            `Watch people move in a ${gridSize}x${gridSize} Hex Grid`;
 
           // Generate HexJSON and create hexmap
           const hexjson = generateHexJSON(gridSize);
@@ -298,13 +297,13 @@
                 // Custom label format if needed
                 return "";
               },
-            }
+            },
           );
 
           // After hexmap is created, add data attributes to hex elements for easier selection
           setTimeout(() => {
             const hexElements = document.querySelectorAll(
-              "#hexmap-container svg g"
+              "#hexmap-container svg g",
             );
             hexElements.forEach((group) => {
               // Each hex group should have a title element with the hex coordinates
@@ -454,7 +453,7 @@
 
         // Update hex colors based on people presence
         const hexGroups = document.querySelectorAll(
-          "#hexmap-container svg g[data-hex-id]"
+          "#hexmap-container svg g[data-hex-id]",
         );
 
         hexGroups.forEach((hexGroup) => {
@@ -473,8 +472,8 @@
               hexGroup.setAttribute(
                 "data-people-info",
                 `${peopleAtLocation.length} person(s): ${peopleAtLocation
-                  .map((p) => `ID ${p.id.substring(0, 8)}`)
-                  .join(", ")}`
+                  .map((p) => `ID ${p.id.substring(0, 8)} (${p.role})`)
+                  .join(", ")}`,
               );
             } else {
               hexPath.classList.remove("has-person");

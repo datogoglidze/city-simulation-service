@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from app.models.person import Location, Person
+from app.models.person import Location, Person, PersonRoles
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
 from app.services.people import PeopleService
@@ -45,7 +45,7 @@ def test_should_load(
     people_service: PeopleService,
     snapshot_service: SnapshotService,
 ) -> None:
-    person = Person(id="1", location=Location(q=0, r=0))
+    person = Person(id="1", location=Location(q=0, r=0), role=PersonRoles.citizen)
     snapshot_repository.save([person])
 
     loaded = snapshot_service.load_people()
@@ -61,7 +61,7 @@ async def test_should_save_periodically(
     people_service: PeopleService,
     snapshot_service: SnapshotService,
 ) -> None:
-    person = Person(id="1", location=Location(q=0, r=0))
+    person = Person(id="1", location=Location(q=0, r=0), role=PersonRoles.citizen)
     people_service.create_one(person)
     periodic_task = asyncio.create_task(snapshot_service.run_periodic_save())
 

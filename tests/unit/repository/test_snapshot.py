@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from app.models.person import Location, Person
+from app.models.person import Location, Person, PersonRoles
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
 
 
@@ -23,7 +23,9 @@ def test_should_raise_when_nothing_exist(
 def test_should_save(
     snapshot: PeopleSnapshotJsonRepository,
 ) -> None:
-    snapshot.save([Person(id="1", location=Location(q=0, r=0))])
+    snapshot.save(
+        [Person(id="1", location=Location(q=0, r=0), role=PersonRoles.citizen)]
+    )
 
     people = snapshot.load()
 
@@ -35,7 +37,7 @@ def test_should_save(
 def test_should_load(
     snapshot: PeopleSnapshotJsonRepository,
 ) -> None:
-    person = Person(id="1", location=Location(q=0, r=0))
+    person = Person(id="1", location=Location(q=0, r=0), role=PersonRoles.citizen)
     snapshot.save([person])
 
     people = snapshot.load()
