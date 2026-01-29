@@ -3,7 +3,7 @@ import pytest
 from tests.fake import FakePerson
 
 from app.models.errors import DoesNotExistError, ExistsError
-from app.models.person import Person
+from app.models.person import Person, PersonRole
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 
 
@@ -20,8 +20,11 @@ def test_should_read_nothing_when_nothing_exist(
     assert len(existing_people) == 0
 
 
-def test_should_create_one(people: PeopleInMemoryRepository) -> None:
-    person = FakePerson().entity
+@pytest.mark.parametrize("person_role", [PersonRole.citizen, PersonRole.killer])
+def test_should_create_one(
+    people: PeopleInMemoryRepository, person_role: PersonRole
+) -> None:
+    person = FakePerson(role=person_role).entity
 
     people.create_one(person)
 
@@ -41,8 +44,11 @@ def test_should_not_read_when_does_not_exist(people: PeopleInMemoryRepository) -
         people.read_one(FakePerson().entity.id)
 
 
-def test_should_read_one(people: PeopleInMemoryRepository) -> None:
-    person = FakePerson().entity
+@pytest.mark.parametrize("person_role", [PersonRole.citizen, PersonRole.killer])
+def test_should_read_one(
+    people: PeopleInMemoryRepository, person_role: PersonRole
+) -> None:
+    person = FakePerson(role=person_role).entity
     people.create_one(person)
 
     existing_person = people.read_one(person.id)
@@ -73,10 +79,13 @@ def test_should_not_update_when_does_not_exist(
         people.update_one(FakePerson().entity)
 
 
-def test_should_update_one(people: PeopleInMemoryRepository) -> None:
-    new = FakePerson().entity
+@pytest.mark.parametrize("person_role", [PersonRole.citizen, PersonRole.killer])
+def test_should_update_one(
+    people: PeopleInMemoryRepository, person_role: PersonRole
+) -> None:
+    new = FakePerson(role=person_role).entity
     created = people.create_one(new)
-    updated = FakePerson().entity
+    updated = FakePerson(role=person_role).entity
     person = Person(id=new.id, location=updated.location, role=updated.role)
     people.update_one(person)
 
