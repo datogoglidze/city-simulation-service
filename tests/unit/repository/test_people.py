@@ -1,7 +1,9 @@
 import pytest
 
+from tests.fake import FakePerson
+
 from app.models.errors import DoesNotExistError, ExistsError
-from app.models.person import Location, Person, PersonRoles
+from app.models.person import Person
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 
 
@@ -19,7 +21,7 @@ def test_should_read_nothing_when_nothing_exist(
 
 
 def test_should_create_one(people: PeopleInMemoryRepository) -> None:
-    person = Person(id="1", location=Location(q=0, r=0), role=PersonRoles.citizen)
+    person = FakePerson().entity
 
     people.create_one(person)
 
@@ -27,7 +29,7 @@ def test_should_create_one(people: PeopleInMemoryRepository) -> None:
 
 
 def test_should_not_duplicate_on_create_one(people: PeopleInMemoryRepository) -> None:
-    person = Person(id="1", location=Location(q=0, r=0), role=PersonRoles.citizen)
+    person = FakePerson().entity
     people.create_one(person)
 
     with pytest.raises(ExistsError):
@@ -36,14 +38,14 @@ def test_should_not_duplicate_on_create_one(people: PeopleInMemoryRepository) ->
 
 def test_should_not_read_when_does_not_exist(people: PeopleInMemoryRepository) -> None:
     with pytest.raises(DoesNotExistError):
-        people.read_one("1")
+        people.read_one(FakePerson().entity.id)
 
 
 def test_should_read_one(people: PeopleInMemoryRepository) -> None:
-    person = Person(id="1", location=Location(q=0, r=0), role=PersonRoles.citizen)
+    person = FakePerson().entity
     people.create_one(person)
 
-    existing_person = people.read_one("1")
+    existing_person = people.read_one(person.id)
 
     assert existing_person == person
 
@@ -52,14 +54,14 @@ def test_should_not_delete_when_does_not_exist(
     people: PeopleInMemoryRepository,
 ) -> None:
     with pytest.raises(DoesNotExistError):
-        people.delete_one("1")
+        people.delete_one(FakePerson().entity.id)
 
 
 def test_should_delete_one(people: PeopleInMemoryRepository) -> None:
-    person = Person(id="1", location=Location(q=0, r=0), role=PersonRoles.citizen)
+    person = FakePerson().entity
     people.create_one(person)
 
-    people.delete_one("1")
+    people.delete_one(person.id)
 
     assert len(people.read_all()) == 0
 
@@ -68,17 +70,16 @@ def test_should_not_update_when_does_not_exist(
     people: PeopleInMemoryRepository,
 ) -> None:
     with pytest.raises(DoesNotExistError):
-        people.update_one(
-            Person(id="1", location=Location(q=0, r=0), role=PersonRoles.citizen)
-        )
+        people.update_one(FakePerson().entity)
 
 
 def test_should_update_one(people: PeopleInMemoryRepository) -> None:
-    _person = Person(id="1", location=Location(q=0, r=0), role=PersonRoles.citizen)
-    people.create_one(_person)
-    person = Person(id="1", location=Location(q=1, r=1), role=PersonRoles.citizen)
+    new = FakePerson().entity
+    created = people.create_one(new)
+    updated = FakePerson().entity
+    person = Person(id=new.id, location=updated.location, role=updated.role)
     people.update_one(person)
 
-    updated_person = people.read_one("1")
+    updated_person = people.read_one(created.id)
 
     assert updated_person == person
