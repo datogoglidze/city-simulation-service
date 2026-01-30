@@ -22,9 +22,14 @@ lint:
 	poetry run ruff check app tests
 	poetry run mypy app tests
 
-
 test:
 	poetry run pytest tests --cov
 
 run:
 	python -m app.runner --host localhost --port 8000
+
+build:
+	pip install poetry-plugin-export
+	poetry export --without-hashes --format=requirements.txt > requirements.txt
+	docker build -t city-simulation-service:latest --build-arg RELEASE=$$(git rev-parse --short HEAD) .
+	rm requirements.txt
