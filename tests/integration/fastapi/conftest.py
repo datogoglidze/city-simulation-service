@@ -4,11 +4,11 @@ from starlette.testclient import TestClient
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.routers import people, simulation
 from app.runner.fastapi import CityApi
-from app.runner.websocket import WebSocketManager
 from app.services.actions import ActionsService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
+from app.services.websocket import WebSocketService
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def client(
     movement_service: MovementService,
     actions_service: ActionsService,
 ) -> TestClient:
-    websocket_manager = WebSocketManager()
+    websocket_manager = WebSocketService()
 
     return TestClient(
         app=CityApi()

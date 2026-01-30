@@ -1,15 +1,15 @@
 import asyncio
 from dataclasses import asdict, dataclass
 
-from app.runner.websocket import WebSocketManager
 from app.services.actions import ActionsService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
+from app.services.websocket import WebSocketService
 
 
 @dataclass
 class SimulationService:
-    websocket_manager: WebSocketManager
+    websocket_manager: WebSocketService
     people: PeopleService
     movement: MovementService
     actions: ActionsService

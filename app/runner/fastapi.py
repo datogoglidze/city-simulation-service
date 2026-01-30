@@ -11,16 +11,16 @@ from click import echo
 from fastapi import APIRouter, FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.runner.websocket import WebSocketManager
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.snapshot import SnapshotService
+from app.services.websocket import WebSocketService
 
 
 @dataclass
 class CityApi:
     routes: list[APIRouter] = field(default_factory=list)
-    websocket: WebSocketManager = field(init=False)
+    websocket: WebSocketService = field(init=False)
     simulation_service: SimulationService = field(init=False)
     people_service: PeopleService = field(init=False)
     snapshot_service: SnapshotService | None = None
@@ -30,7 +30,7 @@ class CityApi:
 
         return self
 
-    def with_websocket_manager(self, websocket: WebSocketManager) -> CityApi:
+    def with_websocket_manager(self, websocket: WebSocketService) -> CityApi:
         self.websocket = websocket
 
         return self
