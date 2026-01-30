@@ -61,7 +61,34 @@ app/
 
 ## 🚀 Getting Started
 
-### Running the Application
+### Running with Docker (Recommended)
+
+Pull and run the Docker image:
+```bash
+docker pull ghcr.io/datogoglidze/city-simulation-service:latest
+```
+
+Run the container with default settings:
+```bash
+docker run -d -p 8000:8000 --name city-simulation-service --restart always ghcr.io/datogoglidze/city-simulation-service:latest
+```
+
+Run with custom configuration using environment variables:
+```bash
+docker run -d \
+  -p 8000:8000 \
+  --env GRID_SIZE=10 \
+  --env PEOPLE_AMOUNT=10 \
+  --env KILLER_PROBABILITY=0.15 \
+  --env POLICE_PROBABILITY=0.10 \
+  --name city-simulation-service \
+  --restart always \
+  ghcr.io/datogoglidze/city-simulation-service:latest
+```
+
+The application will be available at `http://localhost:8000`
+
+### Running Locally
 
 Start the server with default settings:
 ```bash

@@ -1,0 +1,64 @@
+name: Application
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions: write-all
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - &checkout
+        uses: actions/checkout@v6
+
+      - &setup-python
+        name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.13
+
+      - &install-dependencies
+        name: Install dependencies
+        run: make install
+
+      - name: Lint
+        run: make lint
+
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - *checkout
+      - *setup-python
+      - *install-dependencies
+
+      - name: Tests
+        run: make test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, tests]
+    if: github.event_name == 'push'
+    steps:
+      - *checkout
+      - *setup-python
+      - *install-dependencies
+
+      - name: Build Docker image
+        run: make build
+
+      - name: Tag image for GHCR
+        run: docker tag city-simulation-service:latest ghcr.io/datogoglidze/city-simulation-service:latest
+
+      - name: Log in to GitHub Packages
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push Docker image to GitHub Packages
+        run: docker push ghcr.io/datogoglidze/city-simulation-service:latest
