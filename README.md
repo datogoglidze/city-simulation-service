@@ -115,7 +115,7 @@ PEOPLE_AMOUNT=150
 KILLER_PROBABILITY=0.15
 POLICE_PROBABILITY=0.10
 SNAPSHOT_INTERVAL=60
-SNAPSHOT_PATH=data/simulation_state.json
+SNAPSHOT_PATH=data/snapshots/people.json
 ```
 
 ## 📡 API Endpoints
