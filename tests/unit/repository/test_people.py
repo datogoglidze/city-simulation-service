@@ -15,7 +15,7 @@ def people() -> PeopleInMemoryRepository:
 def test_should_read_nothing_when_nothing_exist(
     people: PeopleInMemoryRepository,
 ) -> None:
-    existing_people = people.read_all()
+    existing_people = people
 
     assert len(existing_people) == 0
 
@@ -35,7 +35,7 @@ def test_should_create_one(
 
     people.create_one(person)
 
-    assert len(people.read_all()) == 1
+    assert len(people) == 1
 
 
 def test_should_not_duplicate_on_create_one(people: PeopleInMemoryRepository) -> None:
@@ -83,7 +83,7 @@ def test_should_delete_one(people: PeopleInMemoryRepository) -> None:
 
     people.delete_one(person.id)
 
-    assert len(people.read_all()) == 0
+    assert len(people) == 0
 
 
 def test_should_not_update_when_does_not_exist(
