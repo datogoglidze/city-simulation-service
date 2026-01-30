@@ -116,4 +116,6 @@ class PeopleInitializer:
             else:
                 role = PersonRole.citizen
 
-            self.people_service.create_one(Person(location=location, role=role))
+            self.people_service.create_one(
+                Person(location=location, role=role, is_dead=False)
+            )

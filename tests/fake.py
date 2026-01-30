@@ -12,6 +12,7 @@ class FakePerson:
     faker: Faker = Faker()
     role: PersonRole | None = None
     location: Location | None = None
+    is_dead: bool | None = None
 
     @cached_property
     def entity(self) -> Person:
@@ -24,6 +25,7 @@ class FakePerson:
                 )
             ),
             role=self.role or PersonRole.citizen,
+            is_dead=self.is_dead or False,
         )
 
     def json(self) -> dict[str, Any]:
@@ -33,4 +35,5 @@ class FakePerson:
                 "r": self.entity.location.r,
             },
             "role": self.entity.role.value,
+            "is_dead": self.entity.is_dead,
         }

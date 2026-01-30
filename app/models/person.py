@@ -19,5 +19,6 @@ class Location:
 class Person:
     location: Location
     role: PersonRole
+    is_dead: bool
 
     id: str = field(default_factory=lambda: str(uuid4()))

@@ -420,22 +420,16 @@
         });
       }
 
-      // Generate a consistent random color for a person ID
-      function getPersonColor(personId) {
-        if (!personColors[personId]) {
-          // Generate a vibrant color using the person ID as seed
-          const hash = personId.split("").reduce((acc, char) => {
-            return char.charCodeAt(0) + ((acc << 5) - acc);
-          }, 0);
-
-          // Generate HSL color with fixed saturation and lightness for vibrant colors
-          const hue = Math.abs(hash) % 360;
-          const saturation = 65 + (Math.abs(hash >> 8) % 25); // 65-90%
-          const lightness = 50 + (Math.abs(hash >> 16) % 15); // 50-65%
-
-          personColors[personId] = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-        }
-        return personColors[personId];
+      // Get color based on person role
+      function getPersonColor(person) {
+        // Map roles to specific colors
+        const roleColors = {
+          'killer': '#e74c3c',  // Red
+          'police': '#3498db',  // Blue
+          'citizen': '#2ecc71'  // Green
+        };
+        
+        return roleColors[person.role] || '#95a5a6'; // Default gray if role unknown
       }
 
       function updateHexmap(people) {
@@ -466,18 +460,29 @@
               const peopleAtLocation = locationMap[hexId];
 
               // Use the color of the first person at this location
-              const personColor = getPersonColor(peopleAtLocation[0].id);
+              const firstPerson = peopleAtLocation[0];
+              let personColor = getPersonColor(firstPerson);
+              
+              // If person is dead, use grayscale
+              if (firstPerson.is_dead) {
+                personColor = "#999999"; // Gray color for dead people
+                hexPath.style.opacity = "0.5"; // Also reduce opacity
+              } else {
+                hexPath.style.opacity = "1"; // Reset opacity for alive people
+              }
+              
               hexPath.style.fill = personColor;
 
               hexGroup.setAttribute(
                 "data-people-info",
                 `${peopleAtLocation.length} person(s): ${peopleAtLocation
-                  .map((p) => `ID ${p.id.substring(0, 8)} (${p.role})`)
+                  .map((p) => `ID ${p.id.substring(0, 8)} (${p.role})${p.is_dead ? ' [DEAD]' : ''}`)
                   .join(", ")}`,
               );
             } else {
               hexPath.classList.remove("has-person");
               hexPath.style.fill = "";
+              hexPath.style.opacity = "1";
               hexGroup.removeAttribute("data-people-info");
             }
           }

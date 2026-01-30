@@ -107,7 +107,9 @@ def test_should_update_one(
     new = FakePerson(role=person_role).entity
     created = people.create_one(new)
     updated = FakePerson(role=person_role).entity
-    person = Person(id=new.id, location=updated.location, role=updated.role)
+    person = Person(
+        id=new.id, location=updated.location, role=updated.role, is_dead=updated.is_dead
+    )
     people.update_one(person)
 
     updated_person = people.read_one(created.id)
