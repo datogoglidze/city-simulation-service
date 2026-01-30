@@ -5,7 +5,7 @@ from starlette.websockets import WebSocket
 
 
 @dataclass
-class WebSocketManager:
+class WebSocketService:
     active_connections: list[WebSocket] = field(default_factory=list)
 
     @property

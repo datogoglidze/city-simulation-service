@@ -11,19 +11,19 @@ from app.routers import people, simulation
 from app.runner.config import config
 from app.runner.factory import SnapshotFactory
 from app.runner.fastapi import CityApi, UvicornServer
-from app.runner.websocket import WebSocketManager
 from app.services.actions import ActionsService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.snapshot import SnapshotService
+from app.services.websocket import WebSocketService
 
 cli = Typer(no_args_is_help=True, add_completion=False)
 
 
 @cli.command()
 def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
-    websocket_manager = WebSocketManager()
+    websocket_manager = WebSocketService()
     people_repository = PeopleInMemoryRepository()
 
     people_service = PeopleService(people=people_repository)
