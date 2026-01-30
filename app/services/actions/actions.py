@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from app.models.person import Location, Person, PersonRole
+from app.models.person import Location, Person
+from app.services.actions.strategies import RoleStrategies
 from app.services.people import PeopleService
 
 
@@ -8,19 +9,16 @@ from app.services.people import PeopleService
 class ActionsService:
     people: PeopleService
 
+    strategies: RoleStrategies = field(default_factory=lambda: RoleStrategies())
+
     def kill(self) -> None:
         for person in self.people.read_all():
-            if person.role == PersonRole.killer:
-                adjacent_people = self._get_adjacent_people_of(person)
-                for adjacent_person in adjacent_people:
-                    if adjacent_person.role == PersonRole.citizen:
-                        self.people.delete_one(adjacent_person.id)
+            strategy = self.strategies.get_strategy_for(person.role)
+            adjacent_people = self._get_adjacent_people_of(person)
+            targets = strategy.get_targets_from(adjacent_people)
 
-            if person.role == PersonRole.police:
-                adjacent_people = self._get_adjacent_people_of(person)
-                for adjacent_person in adjacent_people:
-                    if adjacent_person.role == PersonRole.killer:
-                        self.people.delete_one(adjacent_person.id)
+            for target in targets:
+                self.people.delete_one(target.id)
 
     def _get_adjacent_people_of(self, person: Person) -> list[Person]:
         directions = [
