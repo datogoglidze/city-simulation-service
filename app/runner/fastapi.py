@@ -54,7 +54,7 @@ class CityApi:
 
     def build(self) -> FastAPI:
         app = FastAPI(
-            title="City Simulator",
+            title="City Simulation",
             description="Simulates city behavior",
             version="0.1.0",
             lifespan=lifespan,
