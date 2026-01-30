@@ -13,7 +13,7 @@ class PeopleSnapshotJsonRepository:
     snapshot_file: Path
 
     def __post_init__(self) -> None:
-        self.snapshot_file.parent.mkdir(exist_ok=True)
+        self.snapshot_file.parent.mkdir(parents=True, exist_ok=True)
 
     def save(self, people: list[Person]) -> None:
         raw = {"people": [asdict(person) for person in people]}

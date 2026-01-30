@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>City Simulator</title>
+    <title>City Simulation</title>
     <script src="https://open-innovations.github.io/oi.hexmap.js/dist/oi.hexmap.js"></script>
     <style>
       * {
@@ -194,7 +194,7 @@
 
   <body>
     <div class="container">
-      <h1>🏙️ City Simulator</h1>
+      <h1>🏙️ City Simulation</h1>
       <p class="subtitle">Loading grid configuration...</p>
 
       <div id="status" class="status disconnected">Disconnected</div>
@@ -428,7 +428,7 @@
           'police': '#3498db',  // Blue
           'citizen': '#2ecc71'  // Green
         };
-        
+
         return roleColors[person.role] || '#95a5a6'; // Default gray if role unknown
       }
 
@@ -462,7 +462,7 @@
               // Use the color of the first person at this location
               const firstPerson = peopleAtLocation[0];
               let personColor = getPersonColor(firstPerson);
-              
+
               // If person is dead, use grayscale
               if (firstPerson.is_dead) {
                 personColor = "#999999"; // Gray color for dead people
@@ -470,7 +470,7 @@
               } else {
                 hexPath.style.opacity = "1"; // Reset opacity for alive people
               }
-              
+
               hexPath.style.fill = personColor;
 
               hexGroup.setAttribute(

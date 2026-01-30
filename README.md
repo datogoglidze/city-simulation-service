@@ -1,10 +1,10 @@
-# 🏙️ City Simulator Service
+# 🏙️ City Simulation Service
 
 A real-time city simulation service that simulates people with different roles moving across a hexagonal grid, with role-based interactions and lifecycle dynamics.
 
 ## 📋 Overview
 
-The City Simulator Service is a Python-based backend application that:
+The City Simulation Service is a Python-based backend application that:
 - Simulates the movement of people with different roles (Citizens, Killers, Police) on a hexagonal grid in real-time
 - Implements role-based interactions: Killers target Citizens, Police target Killers
 - Manages people lifecycle with lifespan and death mechanics
@@ -63,17 +63,7 @@ app/
 
 ### Running with Docker (Recommended)
 
-Pull and run the Docker image:
-```bash
-docker pull ghcr.io/datogoglidze/city-simulation-service:latest
-```
-
-Run the container with default settings:
-```bash
-docker run -d -p 8000:8000 --name city-simulation-service --restart always ghcr.io/datogoglidze/city-simulation-service:latest
-```
-
-Run with custom configuration using environment variables:
+Pull and run the Docker image with a custom configuration using environment variables:
 ```bash
 docker run -d \
   -p 8000:8000 \
@@ -81,6 +71,9 @@ docker run -d \
   --env PEOPLE_AMOUNT=10 \
   --env KILLER_PROBABILITY=0.15 \
   --env POLICE_PROBABILITY=0.10 \
+  --env SNAPSHOT_PATH=/data/snapshots/people.json \
+  --env SNAPSHOT_INTERVAL=10 \
+  --volume city-simulation-service:/data/snapshots \
   --name city-simulation-service \
   --restart always \
   ghcr.io/datogoglidze/city-simulation-service:latest
