@@ -117,5 +117,10 @@ class PeopleInitializer:
                 role = PersonRole.citizen
 
             self.people_service.create_one(
-                Person(location=location, role=role, is_dead=False)
+                Person(
+                    location=location,
+                    role=role,
+                    is_dead=False,
+                    lifespan=random.randint(70, 100),
+                )
             )

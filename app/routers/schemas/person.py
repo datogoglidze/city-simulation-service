@@ -13,6 +13,7 @@ class PersonCreate(BaseModel):
     location: PersonLocation
     role: PersonRole
     is_dead: bool
+    lifespan: int
 
 
 class PersonRead(BaseModel):
@@ -20,3 +21,4 @@ class PersonRead(BaseModel):
     location: PersonLocation
     role: PersonRole
     is_dead: bool
+    lifespan: int

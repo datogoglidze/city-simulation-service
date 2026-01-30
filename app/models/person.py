@@ -20,5 +20,6 @@ class Person:
     location: Location
     role: PersonRole
     is_dead: bool
+    lifespan: int
 
     id: str = field(default_factory=lambda: str(uuid4()))

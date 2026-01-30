@@ -29,6 +29,7 @@ class PeopleSnapshotJsonRepository:
                 location=Location(**person["location"]),
                 role=PersonRole(person["role"]),
                 is_dead=person["is_dead"],
+                lifespan=person["lifespan"],
             )
             for person in snapshot.people()
         ]
