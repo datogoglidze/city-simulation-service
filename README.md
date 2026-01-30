@@ -71,9 +71,9 @@ docker run -d \
   --env PEOPLE_AMOUNT=10 \
   --env KILLER_PROBABILITY=0.15 \
   --env POLICE_PROBABILITY=0.10 \
-  --env SNAPSHOT_PATH=/data/snapshots/people.json \
+  --env SNAPSHOT_PATH=//data/snapshots/people.json \
   --env SNAPSHOT_INTERVAL=10 \
-  --volume city-simulation-service:/data/snapshots \
+  --mount type=volume,src=city-simulation-service,dst=//data/snapshots \
   --name city-simulation-service \
   --restart always \
   ghcr.io/datogoglidze/city-simulation-service:latest
