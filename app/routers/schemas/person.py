@@ -12,9 +12,11 @@ class PersonLocation(BaseModel):
 class PersonCreate(BaseModel):
     location: PersonLocation
     role: PersonRole
+    is_dead: bool
 
 
 class PersonRead(BaseModel):
     id: str
     location: PersonLocation
     role: PersonRole
+    is_dead: bool

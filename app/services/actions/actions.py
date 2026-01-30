@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from app.models.person import Location, Person
 from app.services.actions.strategies import RoleStrategies
@@ -18,7 +18,8 @@ class ActionsService:
             targets = strategy.get_targets_from(adjacent_people)
 
             for target in targets:
-                self.people.delete_one(target.id)
+                dead_target = replace(target, is_dead=True)
+                self.people.update_one(dead_target)
 
     def _get_adjacent_people_of(self, person: Person) -> list[Person]:
         directions = [

@@ -62,3 +62,17 @@ def test_should_stay_in_place_when_no_valid_moves(
     )
 
     assert generated_location == person.location
+
+
+def test_should_stay_in_place_when_dead(
+    person: Person,
+    people_service: PeopleService,
+    movement_service: MovementService,
+) -> None:
+    person = FakePerson(location=Location(q=0, r=1), is_dead=True).entity
+    people_service.create_one(person)
+    movement_service.move_people_to_random_adjacent_location()
+
+    moved_person_location = people_service.read_one(person.id).location
+
+    assert moved_person_location == person.location

@@ -12,13 +12,15 @@ class MovementService:
 
     def move_people_to_random_adjacent_location(self) -> None:
         for person in self.people.read_all():
-            generated_location = self._generate_random_adjacent_location_for(person)
-            updated_person = Person(
-                id=person.id,
-                location=generated_location,
-                role=person.role,
-            )
-            self.people.update_one(updated_person)
+            if not person.is_dead:
+                generated_location = self._generate_random_adjacent_location_for(person)
+                updated_person = Person(
+                    id=person.id,
+                    location=generated_location,
+                    role=person.role,
+                    is_dead=person.is_dead,
+                )
+                self.people.update_one(updated_person)
 
     def _generate_random_adjacent_location_for(self, person: Person) -> Location:
         directions = [

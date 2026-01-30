@@ -25,10 +25,11 @@ def test_killer_should_not_kill_killer(
     people_service.create_one(killer_1)
     killer_2 = FakePerson(location=Location(q=0, r=1), role=PersonRole.killer).entity
     people_service.create_one(killer_2)
-
     actions_service.kill()
 
-    assert people_service.read_all() == [killer_1, killer_2]
+    victim = people_service.read_one(killer_2.id)
+
+    assert not victim.is_dead
 
 
 def test_killer_should_kill_citizen(
@@ -38,10 +39,11 @@ def test_killer_should_kill_citizen(
     people_service.create_one(killer)
     citizen = FakePerson(location=Location(q=0, r=1), role=PersonRole.citizen).entity
     people_service.create_one(citizen)
-
     actions_service.kill()
 
-    assert people_service.read_all() == [killer]
+    victim = people_service.read_one(citizen.id)
+
+    assert victim.is_dead
 
 
 def test_police_should_not_kill_citizen(
@@ -51,10 +53,11 @@ def test_police_should_not_kill_citizen(
     people_service.create_one(police)
     citizen = FakePerson(location=Location(q=0, r=1), role=PersonRole.citizen).entity
     people_service.create_one(citizen)
-
     actions_service.kill()
 
-    assert people_service.read_all() == [police, citizen]
+    victim = people_service.read_one(citizen.id)
+
+    assert not victim.is_dead
 
 
 def test_police_should_kill_killer(
@@ -64,7 +67,8 @@ def test_police_should_kill_killer(
     people_service.create_one(police)
     killer = FakePerson(location=Location(q=0, r=1), role=PersonRole.killer).entity
     people_service.create_one(killer)
-
     actions_service.kill()
 
-    assert people_service.read_all() == [police]
+    victim = people_service.read_one(killer.id)
+
+    assert victim.is_dead
