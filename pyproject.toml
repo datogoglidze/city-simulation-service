@@ -1,5 +1,5 @@
 [project]
-name = "city-simulator"
+name = "city-simulation"
 version = "0.1.0"
 description = "Simulates city behavior"
 readme = "README.md"
