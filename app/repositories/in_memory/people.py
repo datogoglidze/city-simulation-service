@@ -15,9 +15,6 @@ class PeopleInMemoryRepository:
     def __iter__(self) -> Iterator[Person]:  # pragma: no cover
         return iter(self._people.values())
 
-    def read_all(self) -> list[Person]:
-        return list(self._people.values())
-
     def read_one(self, person_id: str) -> Person:
         person = self._people.get(person_id)
         if not person:
