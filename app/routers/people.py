@@ -26,6 +26,7 @@ def read_all(people: PeopleServiceDependable) -> list[PersonRead]:
             ),
             role=person.role,
             is_dead=person.is_dead,
+            lifespan=person.lifespan,
         )
         for person in _people
     ]
@@ -50,6 +51,7 @@ def read_one(person_id: str, people: PeopleServiceDependable) -> PersonRead:
         ),
         role=_person.role,
         is_dead=_person.is_dead,
+        lifespan=_person.lifespan,
     )
 
 
@@ -66,6 +68,7 @@ def create_one(person: PersonCreate, people: PeopleServiceDependable) -> PersonR
         ),
         role=person.role,
         is_dead=person.is_dead,
+        lifespan=person.lifespan,
     )
 
     created = people.create_one(_person)
@@ -78,6 +81,7 @@ def create_one(person: PersonCreate, people: PeopleServiceDependable) -> PersonR
         ),
         role=created.role,
         is_dead=created.is_dead,
+        lifespan=created.lifespan,
     )
 
 

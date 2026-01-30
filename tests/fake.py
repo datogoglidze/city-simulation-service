@@ -1,3 +1,4 @@
+import random
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Any
@@ -13,6 +14,7 @@ class FakePerson:
     role: PersonRole | None = None
     location: Location | None = None
     is_dead: bool | None = None
+    lifespan: int | None = None
 
     @cached_property
     def entity(self) -> Person:
@@ -26,6 +28,7 @@ class FakePerson:
             ),
             role=self.role or PersonRole.citizen,
             is_dead=self.is_dead or False,
+            lifespan=self.lifespan or random.randint(70, 100),
         )
 
     def json(self) -> dict[str, Any]:
@@ -36,4 +39,5 @@ class FakePerson:
             },
             "role": self.entity.role.value,
             "is_dead": self.entity.is_dead,
+            "lifespan": self.entity.lifespan,
         }

@@ -14,11 +14,13 @@ class MovementService:
         for person in self.people.read_all():
             if not person.is_dead:
                 generated_location = self._generate_random_adjacent_location_for(person)
+                reduced_lifespan = person.lifespan - 1
                 updated_person = Person(
                     id=person.id,
                     location=generated_location,
                     role=person.role,
-                    is_dead=person.is_dead,
+                    is_dead=reduced_lifespan <= 0,
+                    lifespan=reduced_lifespan,
                 )
                 self.people.update_one(updated_person)
 
