@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Iterator
 
@@ -9,7 +10,9 @@ from app.models.person import Location, Person
 class PeopleInMemoryRepository:
     _people: dict[str, Person] = field(default_factory=dict)
 
-    _spatial_index: dict[Location, set[str]] = field(default_factory=dict)
+    _spatial_index: defaultdict[Location, set[str]] = field(
+        default_factory=lambda: defaultdict(set)
+    )
 
     def __len__(self) -> int:  # pragma: no cover
         return len(self._people)
@@ -56,17 +59,16 @@ class PeopleInMemoryRepository:
 
     def read_at_locations(self, locations: set[Location]) -> list[Person]:
         people = []
+
         for location in locations:
-            person_ids = self._spatial_index.get(location, set())
-            for person_id in person_ids:
+            for person_id in self._spatial_index[location]:
                 person = self._people.get(person_id)
-                if person:
+                if person is not None:
                     people.append(person)
+
         return people
 
     def add_to_spatial_index(self, person: Person) -> None:
-        if person.location not in self._spatial_index:
-            self._spatial_index[person.location] = set()
         self._spatial_index[person.location].add(person.id)
 
     def remove_from_spatial_index(self, person: Person) -> None:
