@@ -31,9 +31,11 @@ class ActionsService:
             (0, 1),  # Southeast
         ]
 
-        adjacent_locations = {
-            Location(q=person.location.q + dq, r=person.location.r + dr)
-            for dq, dr in directions
-        }
+        adjacent_people = []
+        for dq, dr in directions:
+            adjacent_location = Location(
+                q=person.location.q + dq, r=person.location.r + dr
+            )
+            adjacent_people.extend(self.people.read_many(location=adjacent_location))
 
-        return self.people.read_at_locations(adjacent_locations)
+        return adjacent_people

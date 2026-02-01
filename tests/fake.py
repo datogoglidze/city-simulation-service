@@ -41,3 +41,23 @@ class FakePerson:
             "is_dead": self.entity.is_dead,
             "lifespan": self.entity.lifespan,
         }
+
+
+@dataclass(frozen=True)
+class FakeLocation:
+    faker: Faker = Faker()
+
+    @cached_property
+    def entity(self) -> Location:
+        return Location(
+            q=self.faker.random_int(min=0, max=10),
+            r=self.faker.random_int(min=0, max=10),
+        )
+
+    def json(self) -> dict[str, Any]:
+        return {
+            "location": {
+                "q": self.entity.q,
+                "r": self.entity.r,
+            },
+        }
