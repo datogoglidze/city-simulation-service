@@ -10,14 +10,14 @@ TId = TypeVar("TId", bound=Hashable)
 
 
 @dataclass
-class MultiIndex(Generic[TEntity, TId]):
+class IndexManager(Generic[TEntity, TId]):
     field_to_extractor: dict[str, Callable[[TEntity], Any]]
 
-    _indexes: dict[str, _Index[TEntity, Any, TId]] = field(init=False)
+    _indexes: dict[str, _FieldIndex[TEntity, Any, TId]] = field(init=False)
 
     def __post_init__(self) -> None:
         self._indexes = {
-            _field: _Index(key_extractor=extractor)
+            _field: _FieldIndex(key_extractor=extractor)
             for _field, extractor in self.field_to_extractor.items()
         }
 
@@ -58,7 +58,7 @@ class MultiIndex(Generic[TEntity, TId]):
 
 
 @dataclass
-class _Index(Generic[TEntity, TKey, TId]):
+class _FieldIndex(Generic[TEntity, TKey, TId]):
     key_extractor: Callable[[TEntity], TKey]
 
     _index: defaultdict[TKey, set[TId]] = field(

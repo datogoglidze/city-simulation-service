@@ -3,15 +3,17 @@ import pytest
 from tests.fake import FakePerson
 
 from app.models.person import Location, Person
-from app.repositories.in_memory.indexes import _Index
+from app.repositories.in_memory.indexes import _FieldIndex
 
 
 @pytest.fixture
-def location_index() -> _Index[Person, Location, str]:
-    return _Index(key_extractor=lambda person: person.location)
+def location_index() -> _FieldIndex[Person, Location, str]:
+    return _FieldIndex(key_extractor=lambda person: person.location)
 
 
-def test_should_add_location(location_index: _Index[Person, Location, str]) -> None:
+def test_should_add_location(
+    location_index: _FieldIndex[Person, Location, str],
+) -> None:
     person = FakePerson().entity
     location_index.create_one(entity_id=person.id, entity=person)
 
@@ -20,7 +22,9 @@ def test_should_add_location(location_index: _Index[Person, Location, str]) -> N
     assert result == {person.id}
 
 
-def test_should_remove_location(location_index: _Index[Person, Location, str]) -> None:
+def test_should_remove_location(
+    location_index: _FieldIndex[Person, Location, str],
+) -> None:
     person = FakePerson().entity
     location_index.create_one(person.id, person)
     location_index.delete_one(person.id, person)
@@ -30,7 +34,9 @@ def test_should_remove_location(location_index: _Index[Person, Location, str]) -
     assert result == set()
 
 
-def test_should_update_location(location_index: _Index[Person, Location, str]) -> None:
+def test_should_update_location(
+    location_index: _FieldIndex[Person, Location, str],
+) -> None:
     new = FakePerson().entity
     updated = FakePerson().entity
     person = Person(

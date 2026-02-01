@@ -3,15 +3,15 @@ from typing import Any, Iterator
 
 from app.models.errors import DoesNotExistError, ExistsError
 from app.models.person import Person
-from app.repositories.in_memory.indexes import MultiIndex
+from app.repositories.in_memory.indexes import IndexManager
 
 
 @dataclass
 class PeopleInMemoryRepository:
     _people: dict[str, Person] = field(default_factory=dict)
 
-    indexes: MultiIndex[Person, str] = field(
-        default_factory=lambda: MultiIndex(
+    indexes: IndexManager[Person, str] = field(
+        default_factory=lambda: IndexManager(
             field_to_extractor={"location": lambda person: person.location}
         )
     )
