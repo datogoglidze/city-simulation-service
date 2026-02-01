@@ -72,3 +72,19 @@ def test_police_should_kill_killer(
     victim = people_service.read_one(killer.id)
 
     assert victim.is_dead
+
+
+def test_dead_person_should_not_kill(
+    actions_service: ActionsService, people_service: PeopleService
+) -> None:
+    killer = FakePerson(
+        location=Location(q=0, r=0), role=PersonRole.killer, is_dead=True
+    ).entity
+    people_service.create_one(killer)
+    citizen = FakePerson(location=Location(q=0, r=1), role=PersonRole.citizen).entity
+    people_service.create_one(citizen)
+    actions_service.kill()
+
+    victim = people_service.read_one(citizen.id)
+
+    assert not victim.is_dead

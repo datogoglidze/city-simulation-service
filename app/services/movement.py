@@ -11,18 +11,17 @@ class MovementService:
     people: PeopleService
 
     def move_people_to_random_adjacent_location(self) -> None:
-        for person in self.people.read_all():
-            if not person.is_dead:
-                generated_location = self._generate_random_adjacent_location_for(person)
-                reduced_lifespan = person.lifespan - 1
-                updated_person = Person(
-                    id=person.id,
-                    location=generated_location,
-                    role=person.role,
-                    is_dead=reduced_lifespan <= 0,
-                    lifespan=reduced_lifespan,
-                )
-                self.people.update_one(updated_person)
+        for person in self.people.read_many(is_dead=False):
+            generated_location = self._generate_random_adjacent_location_for(person)
+            reduced_lifespan = person.lifespan - 1
+            updated_person = Person(
+                id=person.id,
+                location=generated_location,
+                role=person.role,
+                is_dead=reduced_lifespan <= 0,
+                lifespan=reduced_lifespan,
+            )
+            self.people.update_one(updated_person)
 
     def _generate_random_adjacent_location_for(self, person: Person) -> Location:
         directions = [
