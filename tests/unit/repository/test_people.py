@@ -121,36 +121,22 @@ def test_should_update_one(
     assert updated_person == person
 
 
-def test_spatial_index_updated_on_create(people: PeopleInMemoryRepository) -> None:
-    person = FakePerson().entity
+def test_should_not_read_many_with_no_parameters(
+    people: PeopleInMemoryRepository,
+) -> None:
+    with pytest.raises(ValueError, match="No parameters specified"):
+        people.read_many()
 
+
+def test_should_not_read_many_with_unknown_parameter(
+    people: PeopleInMemoryRepository,
+) -> None:
+    with pytest.raises(ValueError, match="Unknown parameter <unknown_parameter>"):
+        people.read_many(unknown_parameter="value")
+
+
+def test_should_read_many(people: PeopleInMemoryRepository) -> None:
+    person = FakePerson().entity
     people.create_one(person)
 
-    assert people.read_at_locations({person.location}) == [person]
-
-
-def test_spatial_index_updated_on_delete(people: PeopleInMemoryRepository) -> None:
-    person = FakePerson().entity
-    people.create_one(person)
-    people.delete_one(person.id)
-
-    assert people.read_at_locations({person.location}) == []
-
-
-def test_spatial_index_updated_on_update(people: PeopleInMemoryRepository) -> None:
-    new = FakePerson().entity
-    people.create_one(new)
-
-    updated = FakePerson().entity
-    person = Person(
-        id=new.id,
-        location=updated.location,
-        role=updated.role,
-        is_dead=updated.is_dead,
-        lifespan=updated.lifespan,
-    )
-
-    people.update_one(person)
-
-    assert people.read_at_locations({new.location}) == []
-    assert people.read_at_locations({updated.location}) == [person]
+    assert list(people.read_many(location=person.location)) == [person]

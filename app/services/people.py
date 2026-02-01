@@ -1,6 +1,7 @@
 from dataclasses import dataclass
+from typing import Any
 
-from app.models.person import Location, Person
+from app.models.person import Person
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 
 
@@ -17,8 +18,8 @@ class PeopleService:
     def read_one(self, person_id: str) -> Person:
         return self.people.read_one(person_id)
 
-    def read_at_locations(self, locations: set[Location]) -> list[Person]:
-        return self.people.read_at_locations(locations)
+    def read_many(self, **params: Any) -> list[Person]:
+        return list(self.people.read_many(**params))
 
     def delete_one(self, person_id: str) -> None:
         self.people.delete_one(person_id)
