@@ -12,7 +12,7 @@ class ActionsService:
     strategies: RoleStrategies = field(default_factory=lambda: RoleStrategies())
 
     def kill(self) -> None:
-        for person in self.people.read_all():
+        for person in self.people.read_many(is_dead=False):
             strategy = self.strategies.get_strategy_for(person.role)
             adjacent_people = self._get_adjacent_people_of(person)
             targets = strategy.get_targets_from(adjacent_people)
