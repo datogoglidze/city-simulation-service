@@ -36,8 +36,4 @@ class ActionsService:
             for dq, dr in directions
         }
 
-        return [
-            potential_person
-            for potential_person in self.people.read_all()
-            if potential_person.location in adjacent_locations
-        ]
+        return self.people.read_at_locations(adjacent_locations)
