@@ -11,14 +11,14 @@ TId = TypeVar("TId", bound=Hashable)
 
 @dataclass
 class IndexManager(Generic[TEntity, TId]):
-    field_to_extractor: dict[str, Callable[[TEntity], Any]]
+    extractors: dict[str, Callable[[TEntity], Any]]
 
     _indexes: dict[str, _FieldIndex[TEntity, Any, TId]] = field(init=False)
 
     def __post_init__(self) -> None:
         self._indexes = {
             _field: _FieldIndex(key_extractor=extractor)
-            for _field, extractor in self.field_to_extractor.items()
+            for _field, extractor in self.extractors.items()
         }
 
     def create_one(self, entity_id: TId, entity: TEntity) -> None:
