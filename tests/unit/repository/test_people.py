@@ -119,3 +119,38 @@ def test_should_update_one(
     updated_person = people.read_one(created.id)
 
     assert updated_person == person
+
+
+def test_spatial_index_updated_on_create(people: PeopleInMemoryRepository) -> None:
+    person = FakePerson().entity
+
+    people.create_one(person)
+
+    assert people.read_at_locations({person.location}) == [person]
+
+
+def test_spatial_index_updated_on_delete(people: PeopleInMemoryRepository) -> None:
+    person = FakePerson().entity
+    people.create_one(person)
+    people.delete_one(person.id)
+
+    assert people.read_at_locations({person.location}) == []
+
+
+def test_spatial_index_updated_on_update(people: PeopleInMemoryRepository) -> None:
+    new = FakePerson().entity
+    people.create_one(new)
+
+    updated = FakePerson().entity
+    person = Person(
+        id=new.id,
+        location=updated.location,
+        role=updated.role,
+        is_dead=updated.is_dead,
+        lifespan=updated.lifespan,
+    )
+
+    people.update_one(person)
+
+    assert people.read_at_locations({new.location}) == []
+    assert people.read_at_locations({updated.location}) == [person]

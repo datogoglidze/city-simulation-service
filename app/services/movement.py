@@ -36,8 +36,6 @@ class MovementService:
 
         random.shuffle(directions)
 
-        occupied = self._occupied_locations()
-
         for dq, dr in directions:
             new_q = person.location.q + dq
             new_r = person.location.r + dr
@@ -47,13 +45,10 @@ class MovementService:
 
             new_location = Location(q=new_q, r=new_r)
 
-            if new_location not in occupied:
+            if not self.people.read_at_locations({new_location}):
                 return new_location
 
         return person.location
 
     def _is_within_bounds(self, q: int, r: int) -> bool:
         return 0 <= q < self.grid_size and 0 <= r < self.grid_size
-
-    def _occupied_locations(self) -> set[Location]:
-        return {person.location for person in self.people.read_all()}
