@@ -121,7 +121,7 @@ def test_should_update_one(
     assert updated_person == person
 
 
-def test_should_read_all_when_no_parameters(
+def test_should_read_many_with_no_parameters(
     people: PeopleInMemoryRepository,
 ) -> None:
     person = FakePerson().entity

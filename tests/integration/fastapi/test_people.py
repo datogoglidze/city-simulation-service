@@ -69,7 +69,9 @@ def test_should_read_one(client: TestClient, person_role: PersonRole) -> None:
         PersonRole.police,
     ],
 )
-def test_should_read_all(client: TestClient, person_role: PersonRole) -> None:
+def test_should_read_many_with_no_parameters(
+    client: TestClient, person_role: PersonRole
+) -> None:
     person_1 = FakePerson(role=person_role)
     person_2 = FakePerson(role=person_role)
     client.post("/people", json=person_1.json())
