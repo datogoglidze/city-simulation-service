@@ -13,7 +13,8 @@ class PeopleInMemoryRepository:
     indexes: IndexManager[Person, str] = field(
         default_factory=lambda: IndexManager(
             extractors={
-                "location": lambda person: person.location,
+                "q": lambda person: person.location.q,
+                "r": lambda person: person.location.r,
                 "is_dead": lambda person: person.is_dead,
             }
         )
@@ -59,6 +60,9 @@ class PeopleInMemoryRepository:
         self._people[person.id] = person
 
     def read_many(self, **params: Any) -> Iterator[Person]:
+        if not params:
+            return iter(self._people.values())
+
         people_ids = self.indexes.read_many(**params)
 
         people = []
