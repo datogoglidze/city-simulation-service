@@ -139,4 +139,4 @@ def test_should_read_many(people: PeopleInMemoryRepository) -> None:
     person = FakePerson().entity
     people.create_one(person)
 
-    assert list(people.read_many(location=person.location)) == [person]
+    assert list(people.read_many(q=person.location.q, r=person.location.r)) == [person]

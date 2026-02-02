@@ -13,7 +13,8 @@ class PeopleInMemoryRepository:
     indexes: IndexManager[Person, str] = field(
         default_factory=lambda: IndexManager(
             extractors={
-                "location": lambda person: person.location,
+                "q": lambda person: person.location.q,
+                "r": lambda person: person.location.r,
                 "is_dead": lambda person: person.is_dead,
             }
         )

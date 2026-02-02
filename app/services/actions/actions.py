@@ -36,6 +36,8 @@ class ActionsService:
             adjacent_location = Location(
                 q=person.location.q + dq, r=person.location.r + dr
             )
-            adjacent_people.extend(self.people.read_many(location=adjacent_location))
+            adjacent_people.extend(
+                self.people.read_many(q=adjacent_location.q, r=adjacent_location.r)
+            )
 
         return adjacent_people

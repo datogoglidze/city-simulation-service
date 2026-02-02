@@ -44,7 +44,7 @@ class MovementService:
 
             new_location = Location(q=new_q, r=new_r)
 
-            if not self.people.read_many(location=new_location):
+            if not self.people.read_many(q=new_location.q, r=new_location.r):
                 return new_location
 
         return person.location
