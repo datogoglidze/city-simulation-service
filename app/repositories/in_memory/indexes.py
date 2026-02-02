@@ -37,11 +37,11 @@ class IndexManager(Generic[TEntity, TId]):
 
     def read_many(self, **filters: Any) -> set[TId]:
         if not filters:
-            raise ValueError("No parameters specified")
+            raise ValueError("No filters specified")
 
         for _field in filters:
             if _field not in self._indexes:
-                raise ValueError(f"Unknown parameter <{_field}>")
+                raise ValueError(f"Unknown filter <{_field}>")
 
         candidate_ids = [
             self._indexes[_field].read_one(value) for _field, value in filters.items()
