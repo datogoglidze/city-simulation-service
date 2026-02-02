@@ -15,7 +15,7 @@ router = APIRouter(prefix="/people", tags=["People"])
     response_model=list[PersonRead],
 )
 def read_all(people: PeopleServiceDependable) -> list[PersonRead]:
-    _people = people.read_all()
+    _people = people.read_many()
 
     return [
         PersonRead(

@@ -121,11 +121,13 @@ def test_should_update_one(
     assert updated_person == person
 
 
-def test_should_not_read_many_with_no_parameters(
+def test_should_read_all_when_no_parameters(
     people: PeopleInMemoryRepository,
 ) -> None:
-    with pytest.raises(ValueError, match="No parameters specified"):
-        people.read_many()
+    person = FakePerson().entity
+    people.create_one(person)
+
+    assert list(people.read_many()) == [person]
 
 
 def test_should_not_read_many_with_unknown_parameter(

@@ -60,6 +60,9 @@ class PeopleInMemoryRepository:
         self._people[person.id] = person
 
     def read_many(self, **params: Any) -> Iterator[Person]:
+        if not params:
+            return iter(self._people.values())
+
         people_ids = self.indexes.read_many(**params)
 
         people = []

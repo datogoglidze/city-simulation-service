@@ -12,9 +12,6 @@ class PeopleService:
     def create_one(self, person: Person) -> Person:
         return self.people.create_one(person)
 
-    def read_all(self) -> list[Person]:
-        return list(self.people)
-
     def read_one(self, person_id: str) -> Person:
         return self.people.read_one(person_id)
 

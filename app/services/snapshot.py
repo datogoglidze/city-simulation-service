@@ -23,6 +23,6 @@ class SnapshotService:
     async def run_periodic_save(self) -> None:
         while True:
             await asyncio.sleep(self.interval_seconds)
-            people = self.people_service.read_all()
+            people = self.people_service.read_many()
 
             self.snapshot_repository.save(people)
