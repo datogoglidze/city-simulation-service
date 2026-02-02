@@ -14,8 +14,19 @@ router = APIRouter(prefix="/people", tags=["People"])
     status_code=status.HTTP_200_OK,
     response_model=list[PersonRead],
 )
-def read_all(people: PeopleServiceDependable) -> list[PersonRead]:
-    _people = people.read_many()
+def read_many(
+    people: PeopleServiceDependable,
+    q: int | None = None,
+    r: int | None = None,
+    is_dead: bool | None = None,
+) -> list[PersonRead]:
+    params = {
+        "q": q,
+        "r": r,
+        "is_dead": is_dead,
+    }
+    params = {key: value for key, value in params.items() if value is not None}
+    _people = people.read_many(**params)
 
     return [
         PersonRead(
