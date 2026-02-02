@@ -1,10 +1,15 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
 from app.models.errors import DoesNotExistError
 from app.models.person import Location, Person
 from app.routers.dependables import PeopleServiceDependable
-from app.routers.schemas.person import PersonCreate, PersonLocation, PersonRead
+from app.routers.schemas.person import (
+    PersonCreate,
+    PersonFilters,
+    PersonLocation,
+    PersonRead,
+)
 
 router = APIRouter(prefix="/people", tags=["People"])
 
@@ -16,16 +21,10 @@ router = APIRouter(prefix="/people", tags=["People"])
 )
 def read_many(
     people: PeopleServiceDependable,
-    q: int | None = None,
-    r: int | None = None,
-    is_dead: bool | None = None,
+    filters: PersonFilters = Depends(),
 ) -> list[PersonRead]:
-    params = {
-        "q": q,
-        "r": r,
-        "is_dead": is_dead,
-    }
-    params = {key: value for key, value in params.items() if value is not None}
+    params = filters.model_dump(exclude_none=True)
+
     _people = people.read_many(**params)
 
     return [
