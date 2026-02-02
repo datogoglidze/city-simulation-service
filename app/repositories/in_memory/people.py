@@ -59,11 +59,11 @@ class PeopleInMemoryRepository:
         self.indexes.update_one(person.id, existing, person)
         self._people[person.id] = person
 
-    def read_many(self, **params: Any) -> Iterator[Person]:
-        if not params:
+    def read_many(self, **filters: Any) -> Iterator[Person]:
+        if not filters:
             return iter(self._people.values())
 
-        people_ids = self.indexes.read_many(**params)
+        people_ids = self.indexes.read_many(**filters)
 
         people = []
         for person_id in people_ids:

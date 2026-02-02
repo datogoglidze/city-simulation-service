@@ -15,8 +15,8 @@ class PeopleService:
     def read_one(self, person_id: str) -> Person:
         return self.people.read_one(person_id)
 
-    def read_many(self, **params: Any) -> list[Person]:
-        return list(self.people.read_many(**params))
+    def read_many(self, **filters: Any) -> list[Person]:
+        return list(self.people.read_many(**filters))
 
     def delete_one(self, person_id: str) -> None:
         self.people.delete_one(person_id)

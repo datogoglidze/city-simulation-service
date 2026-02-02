@@ -21,11 +21,11 @@ router = APIRouter(prefix="/people", tags=["People"])
 )
 def read_many(
     people: PeopleServiceDependable,
-    filters: PersonFilters = Depends(),
+    params: PersonFilters = Depends(),
 ) -> list[PersonRead]:
-    params = filters.model_dump(exclude_none=True)
+    filters = params.model_dump(exclude_none=True)
 
-    _people = people.read_many(**params)
+    _people = people.read_many(**filters)
 
     return [
         PersonRead(
