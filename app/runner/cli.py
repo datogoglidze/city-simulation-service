@@ -12,7 +12,7 @@ from app.repositories.in_memory.buildings import BuildingsInMemoryRepository
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.routers import buildings, people, simulation
 from app.runner.config import config
-from app.runner.factory import SnapshotFactory
+from app.runner.factory import JsonRepository
 from app.runner.fastapi import CityApi, UvicornServer
 from app.services.actions import ActionsService
 from app.services.buildings import BuildingsService
@@ -43,12 +43,21 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         people=people_service,
     )
 
-    snapshot_service = SnapshotFactory.create(
-        snapshot_path=config.SNAPSHOT_PATH,
-        snapshot_interval=config.SNAPSHOT_INTERVAL,
-        people_service=people_service,
-        buildings_service=buildings_service,
-    )
+    snapshot_service: SnapshotService | None = None
+
+    if config.SNAPSHOT_PATH:
+        if not config.SNAPSHOT_INTERVAL:
+            raise ValueError("SNAPSHOT_INTERVAL is required when SNAPSHOT_PATH is set")
+
+        snapshot_repositories = JsonRepository.from_path(config.SNAPSHOT_PATH)
+
+        snapshot_service = SnapshotService(
+            people_snapshot_repository=snapshot_repositories.people_snapshot_repository,
+            buildings_snapshot_repository=snapshot_repositories.buildings_snapshot_repository,
+            people_service=people_service,
+            buildings_service=buildings_service,
+            interval_seconds=int(config.SNAPSHOT_INTERVAL),
+        )
 
     people_initializer = WorldInitializer(
         snapshot_service=snapshot_service,
@@ -107,6 +116,7 @@ class WorldInitializer:
     def initialize(self) -> None:
         if self.snapshot_service:
             try:
+                self.snapshot_service.load_buildings()
                 self.snapshot_service.load_people()
                 return
             except FileNotFoundError:
