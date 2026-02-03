@@ -60,9 +60,18 @@ def snapshot_service(
     )
 
 
-def test_should_raise_when_nothing_exist(snapshot_service: SnapshotService) -> None:
+def test_should_raise_when_no_people_snapshot_exist(
+    snapshot_service: SnapshotService,
+) -> None:
     with pytest.raises(FileNotFoundError):
         snapshot_service.load_people()
+
+
+def test_should_raise_when_no_buildings_snapshot_exist(
+    snapshot_service: SnapshotService,
+) -> None:
+    with pytest.raises(FileNotFoundError):
+        snapshot_service.load_buildings()
 
 
 def test_should_load_people(
