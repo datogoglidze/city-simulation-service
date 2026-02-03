@@ -5,7 +5,7 @@ from starlette.testclient import TestClient
 
 from tests.fake import FakePerson
 
-from app.models.person import PersonRole
+from app.models.person import Location, PersonRole
 
 
 def test_should_read_nothing_when_nothing_exist(client: TestClient) -> None:
@@ -84,6 +84,30 @@ def test_should_read_many_with_no_parameters(
         {"id": ANY, **person_1.json()},
         {"id": ANY, **person_2.json()},
     ]
+
+
+def test_should_read_dead(client: TestClient) -> None:
+    person_1 = FakePerson(is_dead=True)
+    person_2 = FakePerson()
+    client.post("/people", json=person_1.json())
+    client.post("/people", json=person_2.json())
+
+    response = client.get("/people?is_dead=true")
+
+    assert response.status_code == 200
+    assert response.json() == [{"id": ANY, **person_1.json()}]
+
+
+def test_should_read_dead_on_q_and_r(client: TestClient) -> None:
+    person_1 = FakePerson(location=Location(q=0, r=0), is_dead=True)
+    person_2 = FakePerson()
+    client.post("/people", json=person_1.json())
+    client.post("/people", json=person_2.json())
+
+    response = client.get("/people?q=0&r=0&is_dead=true")
+
+    assert response.status_code == 200
+    assert response.json() == [{"id": ANY, **person_1.json()}]
 
 
 def test_should_not_delete_when_does_not_exist(client: TestClient) -> None:

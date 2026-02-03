@@ -1,10 +1,15 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
 from app.models.errors import DoesNotExistError
 from app.models.person import Location, Person
 from app.routers.dependables import PeopleServiceDependable
-from app.routers.schemas.person import PersonCreate, PersonLocation, PersonRead
+from app.routers.schemas.person import (
+    PersonCreate,
+    PersonFilters,
+    PersonLocation,
+    PersonRead,
+)
 
 router = APIRouter(prefix="/people", tags=["People"])
 
@@ -14,8 +19,13 @@ router = APIRouter(prefix="/people", tags=["People"])
     status_code=status.HTTP_200_OK,
     response_model=list[PersonRead],
 )
-def read_all(people: PeopleServiceDependable) -> list[PersonRead]:
-    _people = people.read_many()
+def read_many(
+    people: PeopleServiceDependable,
+    params: PersonFilters = Depends(),
+) -> list[PersonRead]:
+    filters = params.model_dump(exclude_none=True)
+
+    _people = people.read_many(**filters)
 
     return [
         PersonRead(

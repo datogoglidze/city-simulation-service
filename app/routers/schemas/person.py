@@ -22,3 +22,9 @@ class PersonRead(BaseModel):
     role: PersonRole
     is_dead: bool
     lifespan: int
+
+
+class PersonFilters(BaseModel):
+    q: int | None = None
+    r: int | None = None
+    is_dead: bool | None = None

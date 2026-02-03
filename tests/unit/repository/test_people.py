@@ -121,7 +121,7 @@ def test_should_update_one(
     assert updated_person == person
 
 
-def test_should_read_many_with_no_parameters(
+def test_should_read_many_with_no_filters(
     people: PeopleInMemoryRepository,
 ) -> None:
     person = FakePerson().entity
@@ -130,11 +130,11 @@ def test_should_read_many_with_no_parameters(
     assert list(people.read_many()) == [person]
 
 
-def test_should_not_read_many_with_unknown_parameter(
+def test_should_not_read_many_with_unknown_filter(
     people: PeopleInMemoryRepository,
 ) -> None:
-    with pytest.raises(ValueError, match="Unknown parameter <unknown_parameter>"):
-        people.read_many(unknown_parameter="value")
+    with pytest.raises(ValueError, match="Unknown filter <unknown_filter>"):
+        people.read_many(unknown_filter="value")
 
 
 def test_should_read_many(people: PeopleInMemoryRepository) -> None:
