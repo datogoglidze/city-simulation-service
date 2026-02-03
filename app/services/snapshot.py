@@ -7,7 +7,7 @@ from app.repositories.text_file.buildings_snapshot import (
     BuildingsSnapshotJsonRepository,
 )
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
-from app.services.building import BuildingService
+from app.services.buildings import BuildingsService
 from app.services.people import PeopleService
 
 
@@ -17,7 +17,7 @@ class SnapshotService:
     people_service: PeopleService
 
     buildings_snapshot_repository: BuildingsSnapshotJsonRepository
-    buildings_service: BuildingService
+    buildings_service: BuildingsService
 
     interval_seconds: int
 

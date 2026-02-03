@@ -6,7 +6,7 @@ from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.routers import buildings, people, simulation
 from app.runner.fastapi import CityApi
 from app.services.actions import ActionsService
-from app.services.building import BuildingService
+from app.services.buildings import BuildingsService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
@@ -14,9 +14,9 @@ from app.services.websocket import WebSocketService
 
 
 @pytest.fixture
-def buildings_service() -> BuildingService:
+def buildings_service() -> BuildingsService:
     buildings_repository = BuildingsInMemoryRepository()
-    return BuildingService(buildings=buildings_repository)
+    return BuildingsService(buildings=buildings_repository)
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def actions_service(people_service: PeopleService) -> ActionsService:
 
 @pytest.fixture
 def movement_service(
-    buildings_service: BuildingService,
+    buildings_service: BuildingsService,
     people_service: PeopleService,
     actions_service: ActionsService,
 ) -> MovementService:
@@ -43,7 +43,7 @@ def movement_service(
 
 @pytest.fixture
 def client(
-    buildings_service: BuildingService,
+    buildings_service: BuildingsService,
     people_service: PeopleService,
     movement_service: MovementService,
     actions_service: ActionsService,

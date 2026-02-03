@@ -11,7 +11,7 @@ from app.repositories.text_file.buildings_snapshot import (
     BuildingsSnapshotJsonRepository,
 )
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
-from app.services.building import BuildingService
+from app.services.buildings import BuildingsService
 from app.services.people import PeopleService
 from app.services.snapshot import SnapshotService
 
@@ -38,10 +38,10 @@ def buildings_snapshot_repository() -> BuildingsSnapshotJsonRepository:
 
 
 @pytest.fixture
-def buildings_service() -> BuildingService:
+def buildings_service() -> BuildingsService:
     buildings_repository = BuildingsInMemoryRepository()
 
-    return BuildingService(buildings=buildings_repository)
+    return BuildingsService(buildings=buildings_repository)
 
 
 @pytest.fixture
@@ -49,7 +49,7 @@ def snapshot_service(
     people_snapshot_repository: PeopleSnapshotJsonRepository,
     people_service: PeopleService,
     buildings_snapshot_repository: BuildingsSnapshotJsonRepository,
-    buildings_service: BuildingService,
+    buildings_service: BuildingsService,
 ) -> SnapshotService:
     return SnapshotService(
         people_snapshot_repository=people_snapshot_repository,
@@ -82,7 +82,7 @@ def test_should_load_people(
 
 def test_should_load_buildings(
     buildings_snapshot_repository: BuildingsSnapshotJsonRepository,
-    buildings_service: BuildingService,
+    buildings_service: BuildingsService,
     snapshot_service: SnapshotService,
 ) -> None:
     building = FakeBuilding().entity
@@ -119,7 +119,7 @@ async def test_should_save_people_periodically(
 @pytest.mark.anyio
 async def test_should_save_buildings_periodically(
     buildings_snapshot_repository: BuildingsSnapshotJsonRepository,
-    buildings_service: BuildingService,
+    buildings_service: BuildingsService,
     snapshot_service: SnapshotService,
 ) -> None:
     building = FakeBuilding().entity

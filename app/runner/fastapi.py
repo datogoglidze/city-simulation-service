@@ -11,7 +11,7 @@ from click import echo
 from fastapi import APIRouter, FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.services.building import BuildingService
+from app.services.buildings import BuildingsService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.snapshot import SnapshotService
@@ -23,7 +23,7 @@ class CityApi:
     routes: list[APIRouter] = field(default_factory=list)
     websocket: WebSocketService = field(init=False)
     simulation_service: SimulationService = field(init=False)
-    buildings_service: BuildingService = field(init=False)
+    buildings_service: BuildingsService = field(init=False)
     people_service: PeopleService = field(init=False)
     snapshot_service: SnapshotService | None = None
 
@@ -42,7 +42,7 @@ class CityApi:
 
         return self
 
-    def with_buildings_service(self, buildings_service: BuildingService) -> CityApi:
+    def with_buildings_service(self, buildings_service: BuildingsService) -> CityApi:
         self.buildings_service = buildings_service
 
         return self
