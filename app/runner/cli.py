@@ -49,7 +49,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         people_service=people_service,
     )
 
-    people_initializer = PeopleInitializer(
+    people_initializer = WorldInitializer(
         snapshot_service=snapshot_service,
         grid_size=config.GRID_SIZE,
         people_amount=config.PEOPLE_AMOUNT,
@@ -89,7 +89,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
 
 
 @dataclass
-class PeopleInitializer:
+class WorldInitializer:
     snapshot_service: SnapshotService | None
 
     grid_size: int
