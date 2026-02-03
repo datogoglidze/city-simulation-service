@@ -1,7 +1,8 @@
 import random
 from dataclasses import dataclass
 
-from app.models.person import Location, Person
+from app.models.location import Location
+from app.models.person import Person
 from app.services.people import PeopleService
 
 

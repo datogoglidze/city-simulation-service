@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field, replace
 
-from app.models.person import Location, Person
+from app.models.location import Location
+from app.models.person import Person
 from app.services.actions.strategies import RoleStrategies
 from app.services.people import PeopleService
 

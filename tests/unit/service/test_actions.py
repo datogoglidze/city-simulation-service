@@ -2,7 +2,8 @@ import pytest
 
 from tests.fake import FakePerson
 
-from app.models.person import Location, PersonRole
+from app.models.location import Location
+from app.models.person import PersonRole
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.services.actions import ActionsService
 from app.services.people import PeopleService

@@ -5,13 +5,16 @@ from dataclasses import dataclass
 
 from typer import Typer
 
-from app.models.person import Location, Person, PersonRole
+from app.models.location import Location
+from app.models.person import Person, PersonRole
+from app.repositories.in_memory.buildings import BuildingsInMemoryRepository
 from app.repositories.in_memory.people import PeopleInMemoryRepository
-from app.routers import people, simulation
+from app.routers import buildings, people, simulation
 from app.runner.config import config
 from app.runner.factory import SnapshotFactory
 from app.runner.fastapi import CityApi, UvicornServer
 from app.services.actions import ActionsService
+from app.services.building import BuildingService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
@@ -24,7 +27,10 @@ cli = Typer(no_args_is_help=True, add_completion=False)
 @cli.command()
 def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
     websocket_manager = WebSocketService()
+    buildings_repository = BuildingsInMemoryRepository()
     people_repository = PeopleInMemoryRepository()
+
+    buildings_service = BuildingService(buildings=buildings_repository)
 
     people_service = PeopleService(people=people_repository)
 
@@ -59,6 +65,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         .run(
             CityApi()
             .with_router(simulation.router)
+            .with_router(buildings.router)
             .with_router(people.router)
             .with_websocket_manager(websocket_manager)
             .with_simulation_service(
@@ -69,6 +76,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
                     actions=actions_service,
                 )
             )
+            .with_buildings_service(buildings_service)
             .with_people_service(people_service)
             .with_snapshot_service(snapshot_service)
             .build()

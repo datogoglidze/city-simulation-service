@@ -5,7 +5,35 @@ from typing import Any
 
 from faker import Faker
 
-from app.models.person import Location, Person, PersonRole
+from app.models.building import Building
+from app.models.location import Location
+from app.models.person import Person, PersonRole
+
+
+@dataclass(frozen=True)
+class FakeBuilding:
+    faker: Faker = Faker()
+    location: Location | None = None
+
+    @cached_property
+    def entity(self) -> Building:
+        return Building(
+            location=(
+                self.location
+                or Location(
+                    q=self.faker.random_int(min=0, max=10),
+                    r=self.faker.random_int(min=0, max=10),
+                )
+            ),
+        )
+
+    def json(self) -> dict[str, Any]:
+        return {
+            "location": {
+                "q": self.entity.location.q,
+                "r": self.entity.location.r,
+            },
+        }
 
 
 @dataclass(frozen=True)

@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
 from app.models.errors import DoesNotExistError
-from app.models.person import Location, Person
+from app.models.location import Location
+from app.models.person import Person
 from app.routers.dependables import PeopleServiceDependable
 from app.routers.schemas.person import (
     PersonCreate,
