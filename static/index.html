@@ -91,6 +91,20 @@
         transform: scale(1.1);
       }
 
+      /* Building styling */
+      #hexmap-container svg path.has-building,
+      #hexmap-container svg polygon.has-building {
+        fill: #000000;
+        stroke: #333;
+        stroke-width: 2;
+      }
+
+      #hexmap-container svg path.has-building:hover,
+      #hexmap-container svg polygon.has-building:hover {
+        filter: brightness(1.2);
+        cursor: pointer;
+      }
+
       #hexmap-container svg text {
         pointer-events: none;
         fill: #333;
@@ -241,6 +255,7 @@
       let hexmapInstance = null;
       let currentPeople = {};
       let personColors = {}; // Cache colors per person ID
+      let buildings = []; // Store buildings data
 
       // Update FPS counter every second
       setInterval(() => {
@@ -268,6 +283,60 @@
           layout: layout,
           hexes: hexes,
         };
+      }
+
+      async function fetchBuildings() {
+        try {
+          const response = await fetch("/buildings");
+          const data = await response.json();
+          buildings = data;
+          console.log(`✅ Loaded ${buildings.length} buildings`);
+          
+          // Render buildings after they're loaded
+          renderBuildings();
+        } catch (error) {
+          console.error("❌ Failed to fetch buildings:", error);
+        }
+      }
+
+      function renderBuildings() {
+        if (!hexmapInstance || buildings.length === 0) return;
+
+        // Build a map of building locations (q,r coordinates)
+        const buildingMap = {};
+        buildings.forEach((building) => {
+          const key = `${building.location.q},${building.location.r}`;
+          if (!buildingMap[key]) {
+            buildingMap[key] = [];
+          }
+          buildingMap[key].push(building);
+        });
+
+        // Find and color building hexagons as black
+        const hexGroups = document.querySelectorAll(
+          "#hexmap-container svg g[data-hex-id]",
+        );
+
+        hexGroups.forEach((hexGroup) => {
+          const hexId = hexGroup.getAttribute("data-hex-id");
+          const hexPath = hexGroup.querySelector("path, polygon");
+
+          if (hexPath && buildingMap[hexId]) {
+            // Mark as building and set black color
+            hexPath.classList.add("has-building");
+            hexPath.style.fill = "#000000"; // Black color for buildings
+            
+            const buildingsAtLocation = buildingMap[hexId];
+            hexGroup.setAttribute(
+              "data-building-info",
+              `Building(s): ${buildingsAtLocation
+                .map((b) => `ID ${b.id.substring(0, 8)}`)
+                .join(", ")}`,
+            );
+          }
+        });
+
+        console.log("✅ Buildings rendered on hexmap");
       }
 
       async function fetchConfig() {
@@ -316,6 +385,9 @@
 
             // Add hover listeners for coordinate tooltip
             setupCoordinateTooltip();
+            
+            // Fetch and render buildings after hexmap is ready
+            fetchBuildings();
           }, 100);
         } catch (error) {
           console.error("❌ Failed to fetch config:", error);
@@ -393,8 +465,12 @@
 
           const hexId = hexGroup.getAttribute("data-hex-id");
           const peopleInfo = hexGroup.getAttribute("data-people-info");
+          const buildingInfo = hexGroup.getAttribute("data-building-info");
 
           let tooltipText = `Coordinates: ${hexId}`;
+          if (buildingInfo) {
+            tooltipText += `\n${buildingInfo}`;
+          }
           if (peopleInfo) {
             tooltipText += `\n${peopleInfo}`;
           }
@@ -455,23 +531,29 @@
           const hexPath = hexGroup.querySelector("path, polygon");
 
           if (hexPath) {
+            // Check if this hex has a building - if so, don't change its color
+            const isBuilding = hexPath.classList.contains("has-building");
+            
             if (locationMap[hexId]) {
               hexPath.classList.add("has-person");
               const peopleAtLocation = locationMap[hexId];
 
-              // Use the color of the first person at this location
-              const firstPerson = peopleAtLocation[0];
-              let personColor = getPersonColor(firstPerson);
+              // Only update color if it's not a building
+              if (!isBuilding) {
+                // Use the color of the first person at this location
+                const firstPerson = peopleAtLocation[0];
+                let personColor = getPersonColor(firstPerson);
 
-              // If person is dead, use grayscale
-              if (firstPerson.is_dead) {
-                personColor = "#999999"; // Gray color for dead people
-                hexPath.style.opacity = "0.5"; // Also reduce opacity
-              } else {
-                hexPath.style.opacity = "1"; // Reset opacity for alive people
+                // If person is dead, use grayscale
+                if (firstPerson.is_dead) {
+                  personColor = "#999999"; // Gray color for dead people
+                  hexPath.style.opacity = "0.5"; // Also reduce opacity
+                } else {
+                  hexPath.style.opacity = "1"; // Reset opacity for alive people
+                }
+
+                hexPath.style.fill = personColor;
               }
-
-              hexPath.style.fill = personColor;
 
               hexGroup.setAttribute(
                 "data-people-info",
@@ -481,8 +563,11 @@
               );
             } else {
               hexPath.classList.remove("has-person");
-              hexPath.style.fill = "";
-              hexPath.style.opacity = "1";
+              // Only reset color if it's not a building
+              if (!isBuilding) {
+                hexPath.style.fill = "";
+                hexPath.style.opacity = "1";
+              }
               hexGroup.removeAttribute("data-people-info");
             }
           }
