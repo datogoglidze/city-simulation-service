@@ -32,10 +32,13 @@ def actions_service(people_service: PeopleService) -> ActionsService:
 
 @pytest.fixture
 def movement_service(
+    buildings_service: BuildingService,
     people_service: PeopleService,
     actions_service: ActionsService,
 ) -> MovementService:
-    return MovementService(grid_size=10, people=people_service)
+    return MovementService(
+        grid_size=10, buildings=buildings_service, people=people_service
+    )
 
 
 @pytest.fixture

@@ -3,12 +3,14 @@ from dataclasses import dataclass
 
 from app.models.location import Location
 from app.models.person import Person
+from app.services.building import BuildingService
 from app.services.people import PeopleService
 
 
 @dataclass
 class MovementService:
     grid_size: int
+    buildings: BuildingService
     people: PeopleService
 
     def move_people_to_random_adjacent_location(self) -> None:
@@ -45,10 +47,16 @@ class MovementService:
 
             new_location = Location(q=new_q, r=new_r)
 
-            if not self.people.read_many(q=new_location.q, r=new_location.r):
+            if self._is_location_free(new_location):
                 return new_location
 
         return person.location
 
     def _is_within_bounds(self, q: int, r: int) -> bool:
         return 0 <= q < self.grid_size and 0 <= r < self.grid_size
+
+    def _is_location_free(self, location: Location) -> bool:
+        has_person = self.people.read_many(q=location.q, r=location.r)
+        has_building = self.buildings.read_many(q=location.q, r=location.r)
+
+        return not has_person and not has_building
