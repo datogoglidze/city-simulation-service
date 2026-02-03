@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from typer import Typer
 
+from app.models.building import Building
 from app.models.location import Location
 from app.models.person import Person, PersonRole
 from app.repositories.in_memory.buildings import BuildingsInMemoryRepository
@@ -52,6 +53,8 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         snapshot_service=snapshot_service,
         grid_size=config.GRID_SIZE,
         people_amount=config.PEOPLE_AMOUNT,
+        building_amount=config.BUILDINGS_AMOUNT,
+        building_service=buildings_service,
         people_service=people_service,
         killer_probability=config.KILLER_PROBABILITY,
         police_probability=config.POLICE_PROBABILITY,
@@ -88,26 +91,38 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
 @dataclass
 class PeopleInitializer:
     snapshot_service: SnapshotService | None
+
     grid_size: int
+
     people_amount: int
+    building_amount: int
+
     killer_probability: float
     police_probability: float
+
     people_service: PeopleService
+    building_service: BuildingService
 
     def initialize(self) -> None:
         if self.snapshot_service:
             try:
                 self.snapshot_service.load_people()
+                return
             except FileNotFoundError:
-                self._generate_people()
-        else:
-            self._generate_people()
+                pass
 
-    def _generate_people(self) -> None:
-        max_people = self.grid_size**2
+        self._generate_world()
 
-        if self.people_amount > max_people:
-            raise ValueError(f"Too many people to initialize. max: {max_people}")
+    def _generate_world(self) -> None:
+        total_locations = self.grid_size**2
+        total_entities = self.people_amount + self.building_amount
+
+        if total_entities > total_locations:
+            raise ValueError(
+                f"Too many entities to initialize. "
+                f"total: {total_entities}, maximum: {total_locations}. "
+                f"people: {self.people_amount}, buildings: {self.building_amount}."
+            )
 
         all_locations = [
             Location(q=q, r=r)
@@ -115,7 +130,20 @@ class PeopleInitializer:
             for r in range(self.grid_size)
         ]
 
-        for location in random.sample(all_locations, self.people_amount):
+        sampled_locations = random.sample(all_locations, total_entities)
+
+        building_locations = sampled_locations[: self.building_amount]
+        people_locations = sampled_locations[self.building_amount :]
+
+        self._generate_buildings(building_locations)
+        self._generate_people(people_locations)
+
+    def _generate_buildings(self, locations: list[Location]) -> None:
+        for location in locations:
+            self.building_service.create_one(Building(location=location))
+
+    def _generate_people(self, locations: list[Location]) -> None:
+        for location in locations:
             rand = random.random()
 
             if rand < self.killer_probability:
