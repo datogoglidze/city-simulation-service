@@ -7,7 +7,7 @@ from app.models.person import Person
 from app.repositories.in_memory.buildings import BuildingsInMemoryRepository
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.services.actions import ActionsService
-from app.services.building import BuildingService
+from app.services.buildings import BuildingsService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 
@@ -18,10 +18,10 @@ def person() -> Person:
 
 
 @pytest.fixture
-def buildings_service() -> BuildingService:
+def buildings_service() -> BuildingsService:
     buildings_repository = BuildingsInMemoryRepository()
 
-    return BuildingService(buildings=buildings_repository)
+    return BuildingsService(buildings=buildings_repository)
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def actions_service(people_service: PeopleService) -> ActionsService:
 
 @pytest.fixture
 def movement_service(
-    buildings_service: BuildingService,
+    buildings_service: BuildingsService,
     people_service: PeopleService,
     actions_service: ActionsService,
 ) -> MovementService:
@@ -79,7 +79,7 @@ def test_should_not_move_on_other_person(
 
 def test_should_not_move_on_building(
     person: Person,
-    buildings_service: BuildingService,
+    buildings_service: BuildingsService,
     movement_service: MovementService,
 ) -> None:
     buildings_service.create_one(FakeBuilding(location=Location(q=0, r=1)).entity)

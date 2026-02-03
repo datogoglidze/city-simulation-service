@@ -15,7 +15,7 @@ from app.runner.config import config
 from app.runner.factory import SnapshotFactory
 from app.runner.fastapi import CityApi, UvicornServer
 from app.services.actions import ActionsService
-from app.services.building import BuildingService
+from app.services.buildings import BuildingsService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
@@ -31,7 +31,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
     buildings_repository = BuildingsInMemoryRepository()
     people_repository = PeopleInMemoryRepository()
 
-    buildings_service = BuildingService(buildings=buildings_repository)
+    buildings_service = BuildingsService(buildings=buildings_repository)
 
     people_service = PeopleService(people=people_repository)
 
@@ -47,6 +47,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         snapshot_path=config.SNAPSHOT_PATH,
         snapshot_interval=config.SNAPSHOT_INTERVAL,
         people_service=people_service,
+        buildings_service=buildings_service,
     )
 
     people_initializer = WorldInitializer(
@@ -54,7 +55,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         grid_size=config.GRID_SIZE,
         people_amount=config.PEOPLE_AMOUNT,
         building_amount=config.BUILDINGS_AMOUNT,
-        building_service=buildings_service,
+        buildings_service=buildings_service,
         people_service=people_service,
         killer_probability=config.KILLER_PROBABILITY,
         police_probability=config.POLICE_PROBABILITY,
@@ -101,7 +102,7 @@ class WorldInitializer:
     police_probability: float
 
     people_service: PeopleService
-    building_service: BuildingService
+    buildings_service: BuildingsService
 
     def initialize(self) -> None:
         if self.snapshot_service:
@@ -140,7 +141,7 @@ class WorldInitializer:
 
     def _generate_buildings(self, locations: list[Location]) -> None:
         for location in locations:
-            self.building_service.create_one(Building(location=location))
+            self.buildings_service.create_one(Building(location=location))
 
     def _generate_people(self, locations: list[Location]) -> None:
         for location in locations:

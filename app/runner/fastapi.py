@@ -11,7 +11,7 @@ from click import echo
 from fastapi import APIRouter, FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.services.building import BuildingService
+from app.services.buildings import BuildingsService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.snapshot import SnapshotService
@@ -23,7 +23,7 @@ class CityApi:
     routes: list[APIRouter] = field(default_factory=list)
     websocket: WebSocketService = field(init=False)
     simulation_service: SimulationService = field(init=False)
-    buildings_service: BuildingService = field(init=False)
+    buildings_service: BuildingsService = field(init=False)
     people_service: PeopleService = field(init=False)
     snapshot_service: SnapshotService | None = None
 
@@ -42,7 +42,7 @@ class CityApi:
 
         return self
 
-    def with_buildings_service(self, buildings_service: BuildingService) -> CityApi:
+    def with_buildings_service(self, buildings_service: BuildingsService) -> CityApi:
         self.buildings_service = buildings_service
 
         return self
@@ -138,21 +138,30 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     simulation_task = asyncio.create_task(app.state.simulation.run())
 
-    snapshot_task = None
+    people_snapshot_task = None
+    buildings_snapshot_task = None
     if app.state.snapshot_service:
-        snapshot_task = asyncio.create_task(
-            app.state.snapshot_service.run_periodic_save()
+        people_snapshot_task = asyncio.create_task(
+            app.state.snapshot_service.run_people_periodic_save()
+        )
+        buildings_snapshot_task = asyncio.create_task(
+            app.state.snapshot_service.run_buildings_periodic_save()
         )
 
     yield
 
     echo("Simulation stopping...")
     simulation_task.cancel()
-    if snapshot_task:
-        snapshot_task.cancel()
+    if people_snapshot_task:
+        people_snapshot_task.cancel()
+    if buildings_snapshot_task:
+        buildings_snapshot_task.cancel()
 
     with suppress(asyncio.CancelledError):
         await simulation_task
-    if snapshot_task:
+    if people_snapshot_task:
         with suppress(asyncio.CancelledError):
-            await snapshot_task
+            await people_snapshot_task
+    if buildings_snapshot_task:
+        with suppress(asyncio.CancelledError):
+            await buildings_snapshot_task

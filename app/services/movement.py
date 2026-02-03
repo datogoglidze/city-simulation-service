@@ -3,14 +3,14 @@ from dataclasses import dataclass
 
 from app.models.location import Location
 from app.models.person import Person
-from app.services.building import BuildingService
+from app.services.buildings import BuildingsService
 from app.services.people import PeopleService
 
 
 @dataclass
 class MovementService:
     grid_size: int
-    buildings: BuildingService
+    buildings: BuildingsService
     people: PeopleService
 
     def move_people_to_random_adjacent_location(self) -> None:

@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, WebSocket
 from starlette.requests import Request
 
-from app.services.building import BuildingService
+from app.services.buildings import BuildingsService
 from app.services.people import PeopleService
 from app.services.websocket import WebSocketService
 
@@ -15,11 +15,11 @@ def get_people_service(request: Request) -> PeopleService:
 PeopleServiceDependable = Annotated[PeopleService, Depends(get_people_service)]
 
 
-def get_buildings_service(request: Request) -> BuildingService:
+def get_buildings_service(request: Request) -> BuildingsService:
     return request.app.state.buildings  # type: ignore
 
 
-BuildingsServiceDependable = Annotated[BuildingService, Depends(get_buildings_service)]
+BuildingsServiceDependable = Annotated[BuildingsService, Depends(get_buildings_service)]
 
 
 def get_websocket_manager(websocket: WebSocket) -> WebSocketService:

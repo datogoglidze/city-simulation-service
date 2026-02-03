@@ -6,7 +6,7 @@ from app.repositories.in_memory.buildings import BuildingsInMemoryRepository
 
 
 @dataclass
-class BuildingService:
+class BuildingsService:
     buildings: BuildingsInMemoryRepository
 
     def create_one(self, building: Building) -> Building:
@@ -20,6 +20,3 @@ class BuildingService:
 
     def delete_one(self, building_id: str) -> None:
         self.buildings.delete_one(building_id)
-
-    def update_one(self, building: Building) -> None:
-        self.buildings.update_one(building)
