@@ -38,6 +38,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
 
     movement_service = MovementService(
         grid_size=config.GRID_SIZE,
+        buildings=buildings_service,
         people=people_service,
     )
 

@@ -1,11 +1,13 @@
 import pytest
 
-from tests.fake import FakePerson
+from tests.fake import FakeBuilding, FakePerson
 
 from app.models.location import Location
 from app.models.person import Person
+from app.repositories.in_memory.buildings import BuildingsInMemoryRepository
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.services.actions import ActionsService
+from app.services.building import BuildingService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 
@@ -13,6 +15,13 @@ from app.services.people import PeopleService
 @pytest.fixture
 def person() -> Person:
     return FakePerson(location=Location(q=0, r=0)).entity
+
+
+@pytest.fixture
+def buildings_service() -> BuildingService:
+    buildings_repository = BuildingsInMemoryRepository()
+
+    return BuildingService(buildings=buildings_repository)
 
 
 @pytest.fixture
@@ -30,10 +39,13 @@ def actions_service(people_service: PeopleService) -> ActionsService:
 
 @pytest.fixture
 def movement_service(
+    buildings_service: BuildingService,
     people_service: PeopleService,
     actions_service: ActionsService,
 ) -> MovementService:
-    return MovementService(grid_size=10, people=people_service)
+    return MovementService(
+        grid_size=10, buildings=buildings_service, people=people_service
+    )
 
 
 def test_should_move_to_adjacent_location(
@@ -50,13 +62,28 @@ def test_should_move_to_adjacent_location(
     )
 
 
-def test_should_stay_in_place_when_no_valid_moves(
+def test_should_not_move_on_other_person(
     person: Person,
     people_service: PeopleService,
     movement_service: MovementService,
 ) -> None:
     people_service.create_one(FakePerson(location=Location(q=0, r=1)).entity)
     people_service.create_one(FakePerson(location=Location(q=1, r=0)).entity)
+
+    generated_location = movement_service._generate_random_adjacent_location_for(
+        person=person
+    )
+
+    assert generated_location == person.location
+
+
+def test_should_not_move_on_building(
+    person: Person,
+    buildings_service: BuildingService,
+    movement_service: MovementService,
+) -> None:
+    buildings_service.create_one(FakeBuilding(location=Location(q=0, r=1)).entity)
+    buildings_service.create_one(FakeBuilding(location=Location(q=1, r=0)).entity)
 
     generated_location = movement_service._generate_random_adjacent_location_for(
         person=person
