@@ -1,6 +1,10 @@
 from pathlib import Path
 
+from app.repositories.text_file.buildings_snapshot import (
+    BuildingsSnapshotJsonRepository,
+)
 from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
+from app.services.building import BuildingService
 from app.services.people import PeopleService
 from app.services.snapshot import SnapshotService
 
@@ -10,6 +14,7 @@ class SnapshotFactory:
     def create(
         snapshot_path: str | None,
         snapshot_interval: str | None,
+        building_service: BuildingService,
         people_service: PeopleService,
     ) -> SnapshotService | None:
         if not snapshot_path:
@@ -18,12 +23,18 @@ class SnapshotFactory:
         if not snapshot_interval:
             raise ValueError("SNAPSHOT_INTERVAL is required when SNAPSHOT_PATH is set")
 
-        snapshot_repository = PeopleSnapshotJsonRepository(
-            snapshot_file=Path(snapshot_path)
+        people_snapshot_repository = PeopleSnapshotJsonRepository(
+            snapshot_file=Path(snapshot_path + "/people.json")
+        )
+
+        buildings_snapshot_repository = BuildingsSnapshotJsonRepository(
+            snapshot_file=Path(snapshot_path + "/buildings.json")
         )
 
         return SnapshotService(
-            snapshot_repository=snapshot_repository,
+            buildings_snapshot_repository=buildings_snapshot_repository,
+            buildings_service=building_service,
+            people_snapshot_repository=people_snapshot_repository,
             people_service=people_service,
             interval_seconds=int(snapshot_interval),
         )

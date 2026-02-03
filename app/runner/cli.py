@@ -47,6 +47,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         snapshot_path=config.SNAPSHOT_PATH,
         snapshot_interval=config.SNAPSHOT_INTERVAL,
         people_service=people_service,
+        building_service=buildings_service,
     )
 
     people_initializer = WorldInitializer(
