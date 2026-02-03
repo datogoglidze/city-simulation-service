@@ -1,14 +1,22 @@
 import pytest
 from starlette.testclient import TestClient
 
+from app.repositories.in_memory.buildings import BuildingsInMemoryRepository
 from app.repositories.in_memory.people import PeopleInMemoryRepository
-from app.routers import people, simulation
+from app.routers import buildings, people, simulation
 from app.runner.fastapi import CityApi
 from app.services.actions import ActionsService
+from app.services.building import BuildingService
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.websocket import WebSocketService
+
+
+@pytest.fixture
+def buildings_service() -> BuildingService:
+    buildings_repository = BuildingsInMemoryRepository()
+    return BuildingService(buildings=buildings_repository)
 
 
 @pytest.fixture
@@ -32,6 +40,7 @@ def movement_service(
 
 @pytest.fixture
 def client(
+    buildings_service: BuildingService,
     people_service: PeopleService,
     movement_service: MovementService,
     actions_service: ActionsService,
@@ -41,6 +50,7 @@ def client(
     return TestClient(
         app=CityApi()
         .with_router(simulation.router)
+        .with_router(buildings.router)
         .with_router(people.router)
         .with_websocket_manager(websocket_manager)
         .with_simulation_service(
@@ -51,6 +61,7 @@ def client(
                 actions=actions_service,
             )
         )
+        .with_buildings_service(buildings_service)
         .with_people_service(people_service)
         .build()
     )

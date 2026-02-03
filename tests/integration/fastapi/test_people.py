@@ -5,7 +5,8 @@ from starlette.testclient import TestClient
 
 from tests.fake import FakePerson
 
-from app.models.person import Location, PersonRole
+from app.models.location import Location
+from app.models.person import PersonRole
 
 
 def test_should_read_nothing_when_nothing_exist(client: TestClient) -> None:

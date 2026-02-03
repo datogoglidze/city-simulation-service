@@ -5,7 +5,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from app.models.person import Location, Person, PersonRole
+from app.models.location import Location
+from app.models.person import Person, PersonRole
 
 
 @dataclass

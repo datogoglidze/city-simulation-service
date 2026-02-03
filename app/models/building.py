@@ -1,21 +1,11 @@
 from dataclasses import dataclass, field
-from enum import Enum
 from uuid import uuid4
 
 from app.models.location import Location
 
 
-class PersonRole(str, Enum):
-    citizen = "citizen"
-    killer = "killer"
-    police = "police"
-
-
 @dataclass(frozen=True)
-class Person:
+class Building:
     location: Location
-    role: PersonRole
-    is_dead: bool
-    lifespan: int
 
     id: str = field(default_factory=lambda: str(uuid4()))
