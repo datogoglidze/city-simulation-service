@@ -10,7 +10,7 @@ from app.models.person import Person, PersonRole
 
 
 @dataclass
-class PeopleSnapshotJsonRepository:
+class PeopleSnapshotFileRepository:
     snapshot_file: Path
 
     def __post_init__(self) -> None:

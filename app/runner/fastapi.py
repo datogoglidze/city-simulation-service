@@ -138,30 +138,21 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     simulation_task = asyncio.create_task(app.state.simulation.run())
 
-    people_snapshot_task = None
-    buildings_snapshot_task = None
+    snapshot_task = None
     if app.state.snapshot_service:
-        people_snapshot_task = asyncio.create_task(
-            app.state.snapshot_service.run_people_periodic_save()
-        )
-        buildings_snapshot_task = asyncio.create_task(
-            app.state.snapshot_service.run_buildings_periodic_save()
+        snapshot_task = asyncio.create_task(
+            app.state.snapshot_service.run_periodic_save()
         )
 
     yield
 
     echo("Simulation stopping...")
     simulation_task.cancel()
-    if people_snapshot_task:
-        people_snapshot_task.cancel()
-    if buildings_snapshot_task:
-        buildings_snapshot_task.cancel()
+    if snapshot_task:
+        snapshot_task.cancel()
 
     with suppress(asyncio.CancelledError):
         await simulation_task
-    if people_snapshot_task:
+    if snapshot_task:
         with suppress(asyncio.CancelledError):
-            await people_snapshot_task
-    if buildings_snapshot_task:
-        with suppress(asyncio.CancelledError):
-            await buildings_snapshot_task
+            await snapshot_task

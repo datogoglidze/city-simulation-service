@@ -8,17 +8,17 @@ from tests.fake import FakeBuilding, FakePerson
 from app.repositories.in_memory.buildings import BuildingsInMemoryRepository
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.repositories.text_file.buildings_snapshot import (
-    BuildingsSnapshotJsonRepository,
+    BuildingsSnapshotFileRepository,
 )
-from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
+from app.repositories.text_file.people_snapshot import PeopleSnapshotFileRepository
 from app.services.buildings import BuildingsService
 from app.services.people import PeopleService
 from app.services.snapshot import SnapshotService
 
 
 @pytest.fixture
-def people_snapshot_repository() -> PeopleSnapshotJsonRepository:
-    return PeopleSnapshotJsonRepository(
+def people_snapshot_repository() -> PeopleSnapshotFileRepository:
+    return PeopleSnapshotFileRepository(
         snapshot_file=Path("data/test_people_snapshot.json")
     )
 
@@ -31,8 +31,8 @@ def people_service() -> PeopleService:
 
 
 @pytest.fixture
-def buildings_snapshot_repository() -> BuildingsSnapshotJsonRepository:
-    return BuildingsSnapshotJsonRepository(
+def buildings_snapshot_repository() -> BuildingsSnapshotFileRepository:
+    return BuildingsSnapshotFileRepository(
         snapshot_file=Path("data/test_buildings_snapshot.json")
     )
 
@@ -46,9 +46,9 @@ def buildings_service() -> BuildingsService:
 
 @pytest.fixture
 def snapshot_service(
-    people_snapshot_repository: PeopleSnapshotJsonRepository,
+    people_snapshot_repository: PeopleSnapshotFileRepository,
     people_service: PeopleService,
-    buildings_snapshot_repository: BuildingsSnapshotJsonRepository,
+    buildings_snapshot_repository: BuildingsSnapshotFileRepository,
     buildings_service: BuildingsService,
 ) -> SnapshotService:
     return SnapshotService(
@@ -75,7 +75,7 @@ def test_should_raise_when_no_buildings_snapshot_exist(
 
 
 def test_should_load_people(
-    people_snapshot_repository: PeopleSnapshotJsonRepository,
+    people_snapshot_repository: PeopleSnapshotFileRepository,
     people_service: PeopleService,
     snapshot_service: SnapshotService,
 ) -> None:
@@ -90,7 +90,7 @@ def test_should_load_people(
 
 
 def test_should_load_buildings(
-    buildings_snapshot_repository: BuildingsSnapshotJsonRepository,
+    buildings_snapshot_repository: BuildingsSnapshotFileRepository,
     buildings_service: BuildingsService,
     snapshot_service: SnapshotService,
 ) -> None:
@@ -104,20 +104,15 @@ def test_should_load_buildings(
     buildings_snapshot_repository.snapshot_file.unlink()
 
 
-@pytest.mark.anyio
-async def test_should_save_people_periodically(
-    people_snapshot_repository: PeopleSnapshotJsonRepository,
+def test_should_save_people(
+    people_snapshot_repository: PeopleSnapshotFileRepository,
     people_service: PeopleService,
     snapshot_service: SnapshotService,
 ) -> None:
     person = FakePerson().entity
     people_service.create_one(person)
-    periodic_task = asyncio.create_task(snapshot_service.run_people_periodic_save())
+    snapshot_service.save_people()
 
-    await asyncio.sleep(snapshot_service.interval_seconds + 1)
-    periodic_task.cancel()
-    with pytest.raises(asyncio.CancelledError):
-        await periodic_task
     loaded = people_snapshot_repository.load()
 
     assert loaded == [person]
@@ -125,22 +120,45 @@ async def test_should_save_people_periodically(
     people_snapshot_repository.snapshot_file.unlink()
 
 
-@pytest.mark.anyio
-async def test_should_save_buildings_periodically(
-    buildings_snapshot_repository: BuildingsSnapshotJsonRepository,
+def test_should_save_buildings(
+    buildings_snapshot_repository: BuildingsSnapshotFileRepository,
     buildings_service: BuildingsService,
     snapshot_service: SnapshotService,
 ) -> None:
     building = FakeBuilding().entity
     buildings_service.create_one(building)
-    periodic_task = asyncio.create_task(snapshot_service.run_buildings_periodic_save())
+    snapshot_service.save_buildings()
+
+    loaded = buildings_snapshot_repository.load()
+
+    assert loaded == [building]
+
+    buildings_snapshot_repository.snapshot_file.unlink()
+
+
+@pytest.mark.anyio
+async def test_should_save_periodically(
+    people_snapshot_repository: PeopleSnapshotFileRepository,
+    buildings_snapshot_repository: BuildingsSnapshotFileRepository,
+    people_service: PeopleService,
+    buildings_service: BuildingsService,
+    snapshot_service: SnapshotService,
+) -> None:
+    person = FakePerson().entity
+    building = FakeBuilding().entity
+    people_service.create_one(person)
+    buildings_service.create_one(building)
+    periodic_task = asyncio.create_task(snapshot_service.run_periodic_save())
 
     await asyncio.sleep(snapshot_service.interval_seconds + 1)
     periodic_task.cancel()
     with pytest.raises(asyncio.CancelledError):
         await periodic_task
-    loaded = buildings_snapshot_repository.load()
+    loaded_person = people_snapshot_repository.load()
+    loaded_building = buildings_snapshot_repository.load()
 
-    assert loaded == [building]
+    assert loaded_person == [person]
+    assert loaded_building == [building]
 
+    people_snapshot_repository.snapshot_file.unlink()
     buildings_snapshot_repository.snapshot_file.unlink()

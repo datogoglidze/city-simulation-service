@@ -1,40 +1,24 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
 from pathlib import Path
 
 from app.repositories.text_file.buildings_snapshot import (
-    BuildingsSnapshotJsonRepository,
+    BuildingsSnapshotFileRepository,
 )
-from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
-from app.services.buildings import BuildingsService
-from app.services.people import PeopleService
-from app.services.snapshot import SnapshotService
+from app.repositories.text_file.people_snapshot import PeopleSnapshotFileRepository
 
 
-class SnapshotFactory:
-    @staticmethod
-    def create(
-        snapshot_path: str | None,
-        snapshot_interval: str | None,
-        buildings_service: BuildingsService,
-        people_service: PeopleService,
-    ) -> SnapshotService | None:
-        if not snapshot_path:
-            return None
+@dataclass
+class JsonFileRepository:
+    snapshot_path: str
 
-        if not snapshot_interval:
-            raise ValueError("SNAPSHOT_INTERVAL is required when SNAPSHOT_PATH is set")
-
-        people_snapshot_repository = PeopleSnapshotJsonRepository(
-            snapshot_file=Path(snapshot_path + "/people.json")
+    def people(self) -> PeopleSnapshotFileRepository:
+        return PeopleSnapshotFileRepository(
+            snapshot_file=Path(self.snapshot_path) / "people.json"
         )
 
-        buildings_snapshot_repository = BuildingsSnapshotJsonRepository(
-            snapshot_file=Path(snapshot_path + "/buildings.json")
-        )
-
-        return SnapshotService(
-            buildings_snapshot_repository=buildings_snapshot_repository,
-            buildings_service=buildings_service,
-            people_snapshot_repository=people_snapshot_repository,
-            people_service=people_service,
-            interval_seconds=int(snapshot_interval),
+    def buildings(self) -> BuildingsSnapshotFileRepository:
+        return BuildingsSnapshotFileRepository(
+            snapshot_file=Path(self.snapshot_path) / "buildings.json"
         )

@@ -10,7 +10,7 @@ from app.models.location import Location
 
 
 @dataclass
-class BuildingsSnapshotJsonRepository:
+class BuildingsSnapshotFileRepository:
     snapshot_file: Path
 
     def __post_init__(self) -> None:
