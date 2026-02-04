@@ -21,17 +21,7 @@ class SnapshotService:
 
     interval_seconds: int
 
-    def load(self) -> None:
-        self._load_people()
-        self._load_buildings()
-
-    async def run_periodic_save(self) -> None:
-        while True:
-            await asyncio.sleep(self.interval_seconds)
-            self._save_people()
-            self._save_buildings()
-
-    def _load_people(self) -> list[Person]:
+    def load_people(self) -> list[Person]:
         people = self.people_snapshot_repository.load()
 
         for person in people:
@@ -39,11 +29,7 @@ class SnapshotService:
 
         return people
 
-    def _save_people(self) -> None:
-        people = self.people_service.read_many()
-        self.people_snapshot_repository.save(people)
-
-    def _load_buildings(self) -> list[Building]:
+    def load_buildings(self) -> list[Building]:
         buildings = self.buildings_snapshot_repository.load()
 
         for building in buildings:
@@ -51,6 +37,16 @@ class SnapshotService:
 
         return buildings
 
-    def _save_buildings(self) -> None:
+    def save_people(self) -> None:
+        people = self.people_service.read_many()
+        self.people_snapshot_repository.save(people)
+
+    def save_buildings(self) -> None:
         buildings = self.buildings_service.read_many()
         self.buildings_snapshot_repository.save(buildings)
+
+    async def run_periodic_save(self) -> None:
+        while True:
+            await asyncio.sleep(self.interval_seconds)
+            self.save_people()
+            self.save_buildings()

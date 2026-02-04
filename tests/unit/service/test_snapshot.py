@@ -63,14 +63,14 @@ def test_should_raise_when_no_people_snapshot_exist(
     snapshot_service: SnapshotService,
 ) -> None:
     with pytest.raises(FileNotFoundError):
-        snapshot_service._load_people()
+        snapshot_service.load_people()
 
 
 def test_should_raise_when_no_buildings_snapshot_exist(
     snapshot_service: SnapshotService,
 ) -> None:
     with pytest.raises(FileNotFoundError):
-        snapshot_service._load_buildings()
+        snapshot_service.load_buildings()
 
 
 def test_should_load_people(
@@ -81,7 +81,7 @@ def test_should_load_people(
     person = FakePerson().entity
     people_snapshot_repository.save([person])
 
-    loaded = snapshot_service._load_people()
+    loaded = snapshot_service.load_people()
 
     assert loaded == [person]
 
@@ -96,7 +96,7 @@ def test_should_load_buildings(
     building = FakeBuilding().entity
     buildings_snapshot_repository.save([building])
 
-    loaded = snapshot_service._load_buildings()
+    loaded = snapshot_service.load_buildings()
 
     assert loaded == [building]
 
@@ -110,7 +110,7 @@ def test_should_save_people(
 ) -> None:
     person = FakePerson().entity
     people_service.create_one(person)
-    snapshot_service._save_people()
+    snapshot_service.save_people()
 
     loaded = people_snapshot_repository.load()
 
@@ -126,7 +126,7 @@ def test_should_save_buildings(
 ) -> None:
     building = FakeBuilding().entity
     buildings_service.create_one(building)
-    snapshot_service._save_buildings()
+    snapshot_service.save_buildings()
 
     loaded = buildings_snapshot_repository.load()
 
