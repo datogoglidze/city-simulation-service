@@ -4,19 +4,19 @@ from dataclasses import dataclass
 from app.models.building import Building
 from app.models.person import Person
 from app.repositories.text_file.buildings_snapshot import (
-    BuildingsSnapshotJsonRepository,
+    BuildingsSnapshotFileRepository,
 )
-from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonRepository
+from app.repositories.text_file.people_snapshot import PeopleSnapshotFileRepository
 from app.services.buildings import BuildingsService
 from app.services.people import PeopleService
 
 
 @dataclass
 class SnapshotService:
-    people_snapshot_repository: PeopleSnapshotJsonRepository
+    people_snapshot_repository: PeopleSnapshotFileRepository
     people_service: PeopleService
 
-    buildings_snapshot_repository: BuildingsSnapshotJsonRepository
+    buildings_snapshot_repository: BuildingsSnapshotFileRepository
     buildings_service: BuildingsService
 
     interval_seconds: int

@@ -12,7 +12,7 @@ from app.repositories.in_memory.buildings import BuildingsInMemoryRepository
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.routers import buildings, people, simulation
 from app.runner.config import config
-from app.runner.factory import JsonRepository
+from app.runner.factory import JsonFileRepository
 from app.runner.fastapi import CityApi, UvicornServer
 from app.services.actions import ActionsService
 from app.services.buildings import BuildingsService
@@ -49,7 +49,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         if not config.SNAPSHOT_INTERVAL:
             raise ValueError("SNAPSHOT_INTERVAL is required when SNAPSHOT_PATH is set")
 
-        json_repository = JsonRepository(snapshot_path=config.SNAPSHOT_PATH)
+        json_repository = JsonFileRepository(snapshot_path=config.SNAPSHOT_PATH)
 
         snapshot_service = SnapshotService(
             people_snapshot_repository=json_repository.people(),
