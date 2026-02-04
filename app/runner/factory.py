@@ -11,16 +11,14 @@ from app.repositories.text_file.people_snapshot import PeopleSnapshotJsonReposit
 
 @dataclass
 class JsonRepository:
-    people_snapshot_repository: PeopleSnapshotJsonRepository
-    buildings_snapshot_repository: BuildingsSnapshotJsonRepository
+    snapshot_path: str
 
-    @staticmethod
-    def from_path(snapshot_path: str) -> JsonRepository:
-        return JsonRepository(
-            people_snapshot_repository=PeopleSnapshotJsonRepository(
-                snapshot_file=Path(snapshot_path) / "people.json"
-            ),
-            buildings_snapshot_repository=BuildingsSnapshotJsonRepository(
-                snapshot_file=Path(snapshot_path) / "buildings.json"
-            ),
+    def people(self) -> PeopleSnapshotJsonRepository:
+        return PeopleSnapshotJsonRepository(
+            snapshot_file=Path(self.snapshot_path) / "people.json"
+        )
+
+    def buildings(self) -> BuildingsSnapshotJsonRepository:
+        return BuildingsSnapshotJsonRepository(
+            snapshot_file=Path(self.snapshot_path) / "buildings.json"
         )

@@ -49,11 +49,11 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         if not config.SNAPSHOT_INTERVAL:
             raise ValueError("SNAPSHOT_INTERVAL is required when SNAPSHOT_PATH is set")
 
-        snapshot_repositories = JsonRepository.from_path(config.SNAPSHOT_PATH)
+        json_repository = JsonRepository(snapshot_path=config.SNAPSHOT_PATH)
 
         snapshot_service = SnapshotService(
-            people_snapshot_repository=snapshot_repositories.people_snapshot_repository,
-            buildings_snapshot_repository=snapshot_repositories.buildings_snapshot_repository,
+            people_snapshot_repository=json_repository.people(),
+            buildings_snapshot_repository=json_repository.buildings(),
             people_service=people_service,
             buildings_service=buildings_service,
             interval_seconds=int(config.SNAPSHOT_INTERVAL),
