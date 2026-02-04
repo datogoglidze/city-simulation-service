@@ -116,8 +116,7 @@ class WorldInitializer:
     def initialize(self) -> None:
         if self.snapshot_service:
             try:
-                self.snapshot_service.load_buildings()
-                self.snapshot_service.load_people()
+                self.snapshot_service.load()
                 return
             except FileNotFoundError:
                 pass

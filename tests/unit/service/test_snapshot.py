@@ -1,4 +1,3 @@
-import asyncio
 from pathlib import Path
 
 import pytest
@@ -64,14 +63,14 @@ def test_should_raise_when_no_people_snapshot_exist(
     snapshot_service: SnapshotService,
 ) -> None:
     with pytest.raises(FileNotFoundError):
-        snapshot_service.load_people()
+        snapshot_service._load_people()
 
 
 def test_should_raise_when_no_buildings_snapshot_exist(
     snapshot_service: SnapshotService,
 ) -> None:
     with pytest.raises(FileNotFoundError):
-        snapshot_service.load_buildings()
+        snapshot_service._load_buildings()
 
 
 def test_should_load_people(
@@ -82,7 +81,7 @@ def test_should_load_people(
     person = FakePerson().entity
     people_snapshot_repository.save([person])
 
-    loaded = snapshot_service.load_people()
+    loaded = snapshot_service._load_people()
 
     assert loaded == [person]
 
@@ -97,27 +96,22 @@ def test_should_load_buildings(
     building = FakeBuilding().entity
     buildings_snapshot_repository.save([building])
 
-    loaded = snapshot_service.load_buildings()
+    loaded = snapshot_service._load_buildings()
 
     assert loaded == [building]
 
     buildings_snapshot_repository.snapshot_file.unlink()
 
 
-@pytest.mark.anyio
-async def test_should_save_people_periodically(
+def test_should_save_people(
     people_snapshot_repository: PeopleSnapshotJsonRepository,
     people_service: PeopleService,
     snapshot_service: SnapshotService,
 ) -> None:
     person = FakePerson().entity
     people_service.create_one(person)
-    periodic_task = asyncio.create_task(snapshot_service.run_people_periodic_save())
+    snapshot_service._save_people()
 
-    await asyncio.sleep(snapshot_service.interval_seconds + 1)
-    periodic_task.cancel()
-    with pytest.raises(asyncio.CancelledError):
-        await periodic_task
     loaded = people_snapshot_repository.load()
 
     assert loaded == [person]
@@ -125,20 +119,15 @@ async def test_should_save_people_periodically(
     people_snapshot_repository.snapshot_file.unlink()
 
 
-@pytest.mark.anyio
-async def test_should_save_buildings_periodically(
+def test_should_save_buildings(
     buildings_snapshot_repository: BuildingsSnapshotJsonRepository,
     buildings_service: BuildingsService,
     snapshot_service: SnapshotService,
 ) -> None:
     building = FakeBuilding().entity
     buildings_service.create_one(building)
-    periodic_task = asyncio.create_task(snapshot_service.run_buildings_periodic_save())
+    snapshot_service._save_buildings()
 
-    await asyncio.sleep(snapshot_service.interval_seconds + 1)
-    periodic_task.cancel()
-    with pytest.raises(asyncio.CancelledError):
-        await periodic_task
     loaded = buildings_snapshot_repository.load()
 
     assert loaded == [building]
