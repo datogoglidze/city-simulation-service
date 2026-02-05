@@ -12,7 +12,7 @@ from app.services.snapshot import SnapshotService
 
 
 @dataclass
-class WorldInitializer:
+class WorldEntities:
     snapshot_service: SnapshotService | None
 
     grid_size: int

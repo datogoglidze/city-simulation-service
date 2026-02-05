@@ -10,12 +10,12 @@ from app.runner.factory import JsonFileRepository
 from app.runner.fastapi import CityApi, UvicornServer
 from app.services.actions import ActionsService
 from app.services.buildings import BuildingsService
-from app.services.initialize import WorldInitializer
 from app.services.movement import MovementService
 from app.services.people import PeopleService
 from app.services.simulation import SimulationService
 from app.services.snapshot import SnapshotService
 from app.services.websocket import WebSocketService
+from app.services.world_entities import WorldEntities
 
 cli = Typer(no_args_is_help=True, add_completion=False)
 
@@ -54,7 +54,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
             interval_seconds=int(config.SNAPSHOT_INTERVAL),
         )
 
-    people_initializer = WorldInitializer(
+    world_entities = WorldEntities(
         snapshot_service=snapshot_service,
         grid_size=config.GRID_SIZE,
         people_amount=config.PEOPLE_AMOUNT,
@@ -70,7 +70,7 @@ def run(host: str = "0.0.0.0", port: int = 8000, path: str = "") -> None:
         .with_host(host)
         .and_port(port)
         .on_path(path)
-        .before_run(people_initializer.initialize)
+        .before_run(world_entities.initialize)
         .run(
             CityApi()
             .with_router(simulation.router)

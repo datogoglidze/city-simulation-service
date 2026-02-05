@@ -3,8 +3,8 @@ import pytest
 from app.repositories.in_memory.buildings import BuildingsInMemoryRepository
 from app.repositories.in_memory.people import PeopleInMemoryRepository
 from app.services.buildings import BuildingsService
-from app.services.initialize import WorldInitializer
 from app.services.people import PeopleService
+from app.services.world_entities import WorldEntities
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def buildings_service() -> BuildingsService:
 def test_should_not_initialize_when_too_many_entities(
     people_service: PeopleService, buildings_service: BuildingsService
 ) -> None:
-    initializer = WorldInitializer(
+    world_entities = WorldEntities(
         people_service=people_service,
         buildings_service=buildings_service,
         people_amount=1,
@@ -36,13 +36,13 @@ def test_should_not_initialize_when_too_many_entities(
     )
 
     with pytest.raises(ValueError):
-        initializer.initialize()
+        world_entities.initialize()
 
 
 def test_should_initialize(
     people_service: PeopleService, buildings_service: BuildingsService
 ) -> None:
-    initializer = WorldInitializer(
+    world_entities = WorldEntities(
         people_service=people_service,
         buildings_service=buildings_service,
         people_amount=1,
@@ -52,7 +52,7 @@ def test_should_initialize(
         grid_size=10,
         snapshot_service=None,
     )
-    initializer.initialize()
+    world_entities.initialize()
 
     people = people_service.read_many()
     buildings = buildings_service.read_many()
