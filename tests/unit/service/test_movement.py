@@ -44,7 +44,7 @@ def movement_service(
     actions_service: ActionsService,
 ) -> MovementService:
     return MovementService(
-        grid_size=10, buildings=buildings_service, people=people_service
+        grid_size=100, buildings=buildings_service, people=people_service
     )
 
 

@@ -21,8 +21,8 @@ class FakeBuilding:
             location=(
                 self.location
                 or Location(
-                    q=self.faker.random_int(min=0, max=10),
-                    r=self.faker.random_int(min=0, max=10),
+                    q=self.faker.random_int(min=0, max=100),
+                    r=self.faker.random_int(min=0, max=100),
                 )
             ),
         )
@@ -50,8 +50,8 @@ class FakePerson:
             location=(
                 self.location
                 or Location(
-                    q=self.faker.random_int(min=0, max=10),
-                    r=self.faker.random_int(min=0, max=10),
+                    q=self.faker.random_int(min=0, max=100),
+                    r=self.faker.random_int(min=0, max=100),
                 )
             ),
             role=self.role or PersonRole.citizen,
@@ -78,8 +78,8 @@ class FakeLocation:
     @cached_property
     def entity(self) -> Location:
         return Location(
-            q=self.faker.random_int(min=0, max=10),
-            r=self.faker.random_int(min=0, max=10),
+            q=self.faker.random_int(min=0, max=100),
+            r=self.faker.random_int(min=0, max=100),
         )
 
     def json(self) -> dict[str, Any]:
