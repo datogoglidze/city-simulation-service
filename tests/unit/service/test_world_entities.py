@@ -49,7 +49,7 @@ def test_should_initialize(
         building_amount=1,
         killer_probability=1,
         police_probability=1,
-        grid_size=10,
+        grid_size=100,
         snapshot_service=None,
     )
     world_entities.initialize()
