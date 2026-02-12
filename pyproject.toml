@@ -10,7 +10,7 @@ dynamic = ["dependencies"]
 requires-python = ">=3.13"
 
 [tool.poetry.dependencies]
-fastapi = {extras = ["standard"], version = "^0.128.1"}
+fastapi = {extras = ["standard"], version = "^0.128.8"}
 pydantic = "^2.12.5"
 typer = "^0.21.0"
 websockets = "^16.0.0"
